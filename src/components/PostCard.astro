@@ -1,0 +1,24 @@
+---
+import type { BlogPost } from "../utils/content";
+import { formatDate, readingTime, slugifyTag, withBase } from "../utils/content";
+
+interface Props {
+  post: BlogPost;
+  compact?: boolean;
+}
+
+const { post, compact = false } = Astro.props;
+---
+
+<article class:list={["post-card", { compact }]}>
+  <div class="post-meta">
+    <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+    <span aria-hidden="true">·</span>
+    <span>{readingTime(post.body ?? "")} min read</span>
+  </div>
+  <h3><a href={withBase(`/blog/${post.id}`)}>{post.data.title}</a></h3>
+  <p>{post.data.description}</p>
+  <div class="tag-row" aria-label="文章标签">
+    {post.data.tags.map((tag) => <a class="tag" href={withBase(`/tags/${slugifyTag(tag)}`)}>#{tag}</a>)}
+  </div>
+</article>

@@ -1,0 +1,15 @@
+---
+import { siteConfig } from "../config";
+import { withBase } from "../utils/content";
+---
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <p>© {new Date().getFullYear()} {siteConfig.author}. Built with Astro.</p>
+    <nav aria-label="页脚导航">
+      <a href={withBase("/tags")}>Tags</a>
+      <a href={withBase("/rss.xml")}>RSS</a>
+      {siteConfig.email && <a href={`mailto:${siteConfig.email}`}>Email</a>}
+    </nav>
+  </div>
+</footer>

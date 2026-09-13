@@ -1,0 +1,25 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
+import { categoryMap, publishedPosts, withBase } from "../../utils/content";
+
+const posts = publishedPosts(await getCollection("blog"));
+---
+
+<BaseLayout title="Blog" description="量子计算、张量网络、量子机器学习与论文复现笔记。">
+  <div class="container">
+    <header class="page-title">
+      <p class="section-kicker">Writing</p>
+      <h1>Blog</h1>
+      <p>从概念推导到代码实现，记录尚在生长中的理解。</p>
+    </header>
+    <nav class="taxonomy-links" aria-label="文章分类">
+      {Object.entries(categoryMap).map(([slug, label]) => <a href={withBase(`/categories/${slug}`)}>{label}</a>)}
+      <a href={withBase("/tags")}>All Tags</a>
+    </nav>
+    <section class="post-list page-section" aria-label="全部文章">
+      {posts.map((post) => <PostCard post={post} />)}
+    </section>
+  </div>
+</BaseLayout>

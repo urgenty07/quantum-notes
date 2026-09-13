@@ -1,0 +1,18 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import { projects } from "../data/projects";
+---
+
+<BaseLayout title="Projects" description="论文复现、算法实现与个人工具。">
+  <div class="container">
+    <header class="page-title">
+      <p class="section-kicker">Selected work</p>
+      <h1>Projects</h1>
+      <p>围绕 Quantum Computing 与 Tensor Networks 的实现、实验和研究工具。</p>
+    </header>
+    <section class="projects-grid page-section" aria-label="项目列表">
+      {projects.map((project) => <ProjectCard project={project} />)}
+    </section>
+  </div>
+</BaseLayout>

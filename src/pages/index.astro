@@ -1,0 +1,87 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostCard from "../components/PostCard.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import { projects } from "../data/projects";
+import { publishedPosts, withBase } from "../utils/content";
+import { siteConfig } from "../config";
+
+const posts = publishedPosts(await getCollection("blog"));
+const latestPosts = posts.slice(0, 4);
+const featuredPosts = posts.filter((post) => post.data.featured).slice(0, 2);
+const focusAreas = [
+  "Quantum Computing",
+  "Tensor Networks",
+  "Quantum Machine Learning",
+  "Quantum Circuit Optimization"
+];
+---
+
+<BaseLayout>
+  <section class="hero">
+    <div class="hero-inner container">
+      <div class="hero-copy">
+        <p class="section-kicker">Research notes · code · reproduction</p>
+        <h1>Thinking in <span>quantum</span> systems.</h1>
+        <p>Exploring Quantum Computing, Tensor Networks and Quantum Machine Learning.</p>
+        <p>记录量子计算、张量网络、量子机器学习以及论文复现过程中的学习与思考。</p>
+        <div class="hero-actions">
+          <a class="button" href={withBase("/blog")}>阅读文章</a>
+          <a class="button secondary" href={siteConfig.github} target="_blank" rel="noreferrer">GitHub ↗</a>
+        </div>
+      </div>
+      <div class="quantum-mark" aria-hidden="true">
+        <span class="quantum-ring"></span>
+        <span class="quantum-core"></span>
+        <span class="quantum-symbol">ψ</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section container" aria-labelledby="focus-title">
+    <div class="section-heading">
+      <div><p class="section-kicker">Current focus</p><h2 id="focus-title">当前关注方向</h2></div>
+    </div>
+    <div class="focus-grid">
+      {focusAreas.map((item, index) => (
+        <article class="focus-item"><span class="focus-number">0{index + 1}</span><h3>{item}</h3></article>
+      ))}
+    </div>
+  </section>
+
+  <section class="page-section container" aria-labelledby="latest-title">
+    <div class="section-heading">
+      <div><p class="section-kicker">Latest notes</p><h2 id="latest-title">最新文章</h2></div>
+      <a href={withBase("/blog")}>查看全部 →</a>
+    </div>
+    <div class="post-grid">{latestPosts.map((post) => <PostCard post={post} />)}</div>
+  </section>
+
+  {featuredPosts.length > 0 && (
+    <section class="section-compact container" aria-labelledby="featured-title">
+      <div class="section-heading">
+        <div><p class="section-kicker">Selected</p><h2 id="featured-title">精选文章</h2></div>
+      </div>
+      <div class="post-grid">{featuredPosts.map((post) => <PostCard post={post} />)}</div>
+    </section>
+  )}
+
+  <section class="page-section container" aria-labelledby="projects-title">
+    <div class="section-heading">
+      <div><p class="section-kicker">Building</p><h2 id="projects-title">项目展示</h2></div>
+      <a href={withBase("/projects")}>全部项目 →</a>
+    </div>
+    <div class="projects-grid">{projects.slice(0, 2).map((project) => <ProjectCard project={project} />)}</div>
+  </section>
+
+  <section class="page-section container" aria-labelledby="about-title">
+    <div class="about-panel">
+      <div><p class="section-kicker">About</p><h2 id="about-title">持续学习，公开记录。</h2></div>
+      <div>
+        <p>我目前主要学习 Quantum Computing、Tensor Networks 与 Quantum Machine Learning。这个网站用于记录学习过程、论文阅读、算法实现和项目复现。</p>
+        <div class="hero-actions"><a class="button secondary" href={withBase("/about")}>更多介绍</a></div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

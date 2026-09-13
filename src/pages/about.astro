@@ -1,0 +1,25 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { siteConfig } from "../config";
+---
+
+<BaseLayout title="About" description={`关于 ${siteConfig.author} 与这个技术博客。`}>
+  <div class="container">
+    <header class="page-title">
+      <p class="section-kicker">Profile</p>
+      <h1>About</h1>
+      <p>你好，我是 {siteConfig.author}。</p>
+    </header>
+    <section class="about-panel" aria-labelledby="about-content-title">
+      <div><h2 id="about-content-title">学习、实现、记录。</h2></div>
+      <div>
+        <p>我目前主要学习 Quantum Computing、Tensor Networks 与 Quantum Machine Learning。这个网站用于记录学习过程、论文阅读、算法实现和项目复现。</p>
+        <p style="margin-top: 1rem;">我会尽量把每一篇笔记写成可回看、可验证、可继续推演的知识单元，而不是只保存结论。</p>
+        <div class="hero-actions">
+          <a class="button secondary" href={siteConfig.github} target="_blank" rel="noreferrer">GitHub ↗</a>
+          {siteConfig.email && <a class="button secondary" href={`mailto:${siteConfig.email}`}>Email</a>}
+        </div>
+      </div>
+    </section>
+  </div>
+</BaseLayout>

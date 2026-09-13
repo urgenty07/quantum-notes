@@ -1,0 +1,26 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
+import { categoryMap, publishedPosts, withBase } from "../../utils/content";
+
+export async function getStaticPaths() {
+  return Object.entries(categoryMap).map(([slug, label]) => ({ params: { category: slug }, props: { label } }));
+}
+
+const { label } = Astro.props as { label: string };
+const posts = publishedPosts(await getCollection("blog", ({ data }) => !data.draft && data.category === label));
+---
+
+<BaseLayout title={label} description={`${label} 分类下的文章与学习笔记。`}>
+  <div class="container">
+    <header class="page-title">
+      <a class="eyebrow" href={withBase("/blog")}>← Blog</a>
+      <h1>{label}</h1>
+      <p>{posts.length} 篇文章</p>
+    </header>
+    <section class="post-list section-compact" aria-label={`${label} 文章`}>
+      {posts.length > 0 ? posts.map((post) => <PostCard post={post} />) : <p class="empty-state">这个分类还没有文章。</p>}
+    </section>
+  </div>
+</BaseLayout>

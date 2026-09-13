@@ -1,0 +1,29 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
+import { publishedPosts, slugifyTag, withBase } from "../../utils/content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  const tags = new Map<string, string>();
+  for (const post of posts) for (const tag of post.data.tags) tags.set(slugifyTag(tag), tag);
+  return [...tags].map(([slug, label]) => ({ params: { tag: slug }, props: { label } }));
+}
+
+const { label } = Astro.props as { label: string };
+const posts = publishedPosts(await getCollection("blog", ({ data }) => !data.draft && data.tags.includes(label)));
+---
+
+<BaseLayout title={`#${label}`} description={`标签 ${label} 下的文章。`}>
+  <div class="container">
+    <header class="page-title">
+      <a class="eyebrow" href={withBase("/tags")}>← Tags</a>
+      <h1>#{label}</h1>
+      <p>{posts.length} 篇文章</p>
+    </header>
+    <section class="post-list section-compact" aria-label={`${label} 标签文章`}>
+      {posts.map((post) => <PostCard post={post} />)}
+    </section>
+  </div>
+</BaseLayout>

@@ -1,0 +1,22 @@
+---
+import type { Project } from "../data/projects";
+import { withBase } from "../utils/content";
+
+interface Props { project: Project }
+const { project } = Astro.props;
+---
+
+<article class="project-card">
+  <div class="project-heading">
+    <h3>{project.name}</h3>
+    <span class="status">{project.status}</span>
+  </div>
+  <p>{project.description}</p>
+  <ul class="stack-list" aria-label="技术栈">
+    {project.stack.map((item) => <li>{item}</li>)}
+  </ul>
+  <div class="project-links">
+    <a href={project.github} target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+    {project.articleSlugs.map((slug) => <a href={withBase(`/blog/${slug}`)}>相关文章</a>)}
+  </div>
+</article>

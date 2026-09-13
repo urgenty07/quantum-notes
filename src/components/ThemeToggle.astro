@@ -1,0 +1,43 @@
+<theme-toggle>
+  <button class="icon-button theme-toggle" type="button" aria-label="切换主题" title="主题：跟随系统">
+    <svg class="theme-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path class="sun" d="M12 3V1m0 22v-2m9-9h2M1 12h2m16.36-7.36 1.42-1.42M3.22 20.78l1.42-1.42m14.72 0 1.42 1.42M3.22 3.22l1.42 1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z" />
+      <path class="moon" d="M20.2 15.2A8.5 8.5 0 0 1 8.8 3.8 8.5 8.5 0 1 0 20.2 15.2Z" />
+    </svg>
+    <span class="sr-only theme-label">跟随系统</span>
+  </button>
+</theme-toggle>
+
+<script>
+  class ThemeToggle extends HTMLElement {
+    connectedCallback() {
+      const button = this.querySelector("button");
+      const label = this.querySelector(".theme-label");
+      if (!(button instanceof HTMLButtonElement) || !(label instanceof HTMLElement)) return;
+
+      const names = { system: "跟随系统", light: "浅色", dark: "深色" } as const;
+      const choices = ["system", "light", "dark"] as const;
+
+      const apply = (preference: typeof choices[number]) => {
+        const dark = preference === "dark" || (preference === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+        document.documentElement.dataset.themePreference = preference;
+        localStorage.setItem("theme", preference);
+        label.textContent = names[preference];
+        button.title = `主题：${names[preference]}`;
+        button.setAttribute("aria-label", `当前${names[preference]}，点击切换主题`);
+      };
+
+      const current = () => (localStorage.getItem("theme") as typeof choices[number] | null) || "system";
+      apply(current());
+      button.addEventListener("click", () => {
+        const index = choices.indexOf(current());
+        apply(choices[(index + 1) % choices.length]);
+      });
+      matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+        if (current() === "system") apply("system");
+      });
+    }
+  }
+  customElements.define("theme-toggle", ThemeToggle);
+</script>
