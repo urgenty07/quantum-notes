@@ -5,7 +5,7 @@
  */
 export const siteConfig = {
   title: "Zephyr",
-  description: "Quantum Computing · Tensor Networks · QML",
+  description: "Projects · Code · Quantum · Notes",
   author: "Zephyr",
   github: "https://github.com/urgenty07",
   email: "",

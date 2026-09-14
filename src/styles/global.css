@@ -260,7 +260,8 @@ main { min-height: calc(100vh - 12rem); }
 .focus-item { min-height: 9rem; padding: 1.25rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); transition: border-color 160ms ease, transform 160ms ease; }
 .focus-item:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
 .focus-number { color: var(--accent); font: 1rem/1.2 ui-monospace, SFMono-Regular, Consolas, monospace; }
-.focus-item h3 { margin: 1.8rem 0 0; font-size: 1rem; line-height: 1.35; }
+.focus-item h3 { margin: 1.45rem 0 0; font-size: 1rem; line-height: 1.35; }
+.focus-item p { margin: 0.55rem 0 0; color: var(--muted); font-size: 0.84rem; line-height: 1.55; }
 
 .post-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 .post-list { display: grid; gap: 1rem; }
