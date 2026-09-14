@@ -6,6 +6,8 @@ dist/
 .env
 .env.*
 !.env.example
+.dev.vars
+worker/.dev.vars
 .DS_Store
 Thumbs.db
 *.log

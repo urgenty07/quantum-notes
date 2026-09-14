@@ -1,0 +1,92 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import AdminEditor from "../components/AdminEditor.astro";
+import { siteConfig } from "../config";
+import { withBase } from "../utils/content";
+---
+
+<BaseLayout title="Editor" description="Zephyr 博客内容管理后台。" noindex>
+  <div class="admin-page" data-admin-app data-api-base={siteConfig.adminApi}>
+    <header class="admin-topbar container">
+      <div>
+        <p class="section-kicker">Private workspace</p>
+        <h1>Content Editor</h1>
+      </div>
+      <div class="admin-account" data-account hidden>
+        <span data-account-name>urgenty07</span>
+        <button class="admin-quiet-button" type="button" data-logout>退出</button>
+      </div>
+    </header>
+
+    <section class="admin-login container" data-login-panel>
+      <div class="admin-login-mark" aria-hidden="true">Ψ</div>
+      <div>
+        <p class="section-kicker">Owner access only</p>
+        <h2>登录后管理你的内容</h2>
+        <p>通过 GitHub App 验证身份。只有仓库所有者 urgenty07 可以读取、创建、修改或删除文章。</p>
+        <button class="button admin-login-button" type="button" data-login disabled={siteConfig.adminApi === ""}>
+          使用 GitHub 登录 <span aria-hidden="true">↗</span>
+        </button>
+        {siteConfig.adminApi === "" && <p class="admin-config-note">安全后端正在配置，完成后这里会自动启用。</p>}
+        <p class="admin-error" data-login-error hidden></p>
+      </div>
+    </section>
+
+    <section class="admin-workspace" data-workspace hidden>
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar-head">
+          <div><span class="admin-label">Content</span><strong>全部文章</strong></div>
+          <button class="admin-icon-button" type="button" data-new-post aria-label="新建文章">＋</button>
+        </div>
+        <label class="admin-search">
+          <span class="sr-only">搜索文章</span>
+          <input type="search" placeholder="搜索标题或文件名" data-search />
+        </label>
+        <div class="admin-post-list" data-post-list aria-live="polite"></div>
+      </aside>
+
+      <form class="admin-editor" data-editor-form>
+        <div class="admin-editor-toolbar">
+          <div>
+            <span class="admin-label" data-editor-mode>New draft</span>
+            <strong data-current-file>未命名文章</strong>
+          </div>
+          <div class="admin-toolbar-actions">
+            <span class="admin-save-state" data-save-state aria-live="polite">尚未保存</span>
+            <button class="admin-quiet-button danger" type="button" data-delete hidden>删除</button>
+            <button class="button admin-save-button" type="submit">保存并发布</button>
+          </div>
+        </div>
+
+        <div class="admin-editor-body">
+          <aside class="admin-fields">
+            <label><span>文件名</span><div class="admin-slug-field"><input name="slug" required pattern="[a-z0-9-]+" placeholder="my-new-post" /><small>.md</small></div></label>
+            <label><span>标题</span><input name="title" required placeholder="文章标题" /></label>
+            <label><span>摘要</span><textarea name="description" rows="3" required placeholder="一句话说明这篇文章的内容"></textarea></label>
+            <label><span>分类</span><select name="category" required>
+              <option>Projects</option><option>Engineering</option><option>Programming</option><option>Learning Notes</option>
+              <option>Quantum Computing</option><option>Tensor Network</option><option>Quantum Machine Learning</option><option>Paper Reading</option>
+            </select></label>
+            <label><span>标签</span><input name="tags" placeholder="Astro, TypeScript" /><small>使用英文逗号分隔</small></label>
+            <label><span>发布日期</span><input name="pubDate" type="date" required /></label>
+            <div class="admin-checks">
+              <label><input name="draft" type="checkbox" /><span>保存为草稿</span></label>
+              <label><input name="featured" type="checkbox" /><span>设为精选</span></label>
+            </div>
+          </aside>
+
+          <div class="admin-writing-area">
+            <div class="admin-pane-head"><span>Markdown</span><span data-word-count>0 字</span></div>
+            <textarea name="content" class="admin-markdown" spellcheck="false" placeholder="# 从这里开始写作…"></textarea>
+          </div>
+
+          <article class="admin-preview">
+            <div class="admin-pane-head"><span>Preview</span><a href={withBase("/blog")} target="_blank">查看博客 ↗</a></div>
+            <div class="admin-preview-content prose" data-preview><p class="admin-preview-placeholder">预览会在这里实时显示。</p></div>
+          </article>
+        </div>
+      </form>
+    </section>
+  </div>
+  <AdminEditor />
+</BaseLayout>

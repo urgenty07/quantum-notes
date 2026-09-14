@@ -1,0 +1,16 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "zephyr-blog-admin",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-14",
+  "workers_dev": true,
+  "preview_urls": true,
+  "vars": {
+    "ALLOWED_ORIGIN": "https://urgenty07.github.io",
+    "ADMIN_URL": "https://urgenty07.github.io/quantum-notes/admin",
+    "GITHUB_OWNER": "urgenty07",
+    "GITHUB_REPO": "quantum-notes",
+    "GITHUB_BRANCH": "main",
+    "ALLOWED_USER": "urgenty07"
+  }
+}

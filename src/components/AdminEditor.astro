@@ -1,0 +1,368 @@
+<script>
+  type PostSummary = { name: string; path: string; sha: string };
+  type PostDraft = {
+    title: string;
+    description: string;
+    pubDate: string;
+    tags: string[];
+    category: string;
+    draft: boolean;
+    featured: boolean;
+    content: string;
+  };
+
+  const app = document.querySelector<HTMLElement>("[data-admin-app]");
+  const loginPanel = document.querySelector<HTMLElement>("[data-login-panel]");
+  const workspace = document.querySelector<HTMLElement>("[data-workspace]");
+  const account = document.querySelector<HTMLElement>("[data-account]");
+  const form = document.querySelector<HTMLFormElement>("[data-editor-form]");
+  const postList = document.querySelector<HTMLElement>("[data-post-list]");
+  const preview = document.querySelector<HTMLElement>("[data-preview]");
+  const saveState = document.querySelector<HTMLElement>("[data-save-state]");
+  const currentFile = document.querySelector<HTMLElement>("[data-current-file]");
+  const editorMode = document.querySelector<HTMLElement>("[data-editor-mode]");
+  const deleteButton = document.querySelector<HTMLButtonElement>("[data-delete]");
+  const sessionKey = "zephyr_blog_admin_session";
+  const apiBase = app?.dataset.apiBase?.replace(/\/$/, "") ?? "";
+
+  let posts: PostSummary[] = [];
+  let activePath = "";
+  let activeSha = "";
+  let dirty = false;
+
+  const field = <T extends HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(name: string) =>
+    form?.elements.namedItem(name) as T | null;
+
+  function setStatus(message: string, tone: "idle" | "working" | "success" | "error" = "idle") {
+    if (!saveState) return;
+    saveState.textContent = message;
+    saveState.dataset.tone = tone;
+  }
+
+  function getSession() {
+    return sessionStorage.getItem(sessionKey) ?? "";
+  }
+
+  function clearSession() {
+    sessionStorage.removeItem(sessionKey);
+  }
+
+  async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
+    const response = await fetch(`${apiBase}${path}`, {
+      ...options,
+      headers: {
+        Authorization: `Bearer ${getSession()}`,
+        "Content-Type": "application/json",
+        ...(options.headers ?? {})
+      }
+    });
+    const payload = await response.json().catch(() => ({ error: "服务器返回了无法解析的响应。" }));
+    if (response.status === 401) {
+      clearSession();
+      showLogin("登录已过期，请重新登录。");
+      throw new Error("登录已过期");
+    }
+    if (!response.ok) throw new Error(payload.error ?? "请求失败，请稍后重试。");
+    return payload as T;
+  }
+
+  function showLogin(message = "") {
+    if (loginPanel) loginPanel.hidden = false;
+    if (workspace) workspace.hidden = true;
+    if (account) account.hidden = true;
+    const error = document.querySelector<HTMLElement>("[data-login-error]");
+    if (error) {
+      error.textContent = message;
+      error.hidden = !message;
+    }
+  }
+
+  function showWorkspace(login: string) {
+    if (loginPanel) loginPanel.hidden = true;
+    if (workspace) workspace.hidden = false;
+    if (account) account.hidden = false;
+    const name = document.querySelector<HTMLElement>("[data-account-name]");
+    if (name) name.textContent = login;
+  }
+
+  function yamlValue(value: string) {
+    const trimmed = value.trim();
+    if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+      try { return JSON.parse(trimmed); } catch { return trimmed.slice(1, -1); }
+    }
+    return trimmed;
+  }
+
+  function parsePost(source: string): PostDraft {
+    const match = source.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+    const meta: Record<string, string | boolean | string[]> = {};
+    const frontmatter = match?.[1] ?? "";
+    let listKey = "";
+    for (const line of frontmatter.split(/\r?\n/)) {
+      const item = line.match(/^\s+-\s+(.+)$/);
+      if (item && listKey) {
+        const values = (meta[listKey] as string[]) ?? [];
+        values.push(String(yamlValue(item[1])));
+        meta[listKey] = values;
+        continue;
+      }
+      const pair = line.match(/^([A-Za-z][\w-]*):\s*(.*)$/);
+      if (!pair) continue;
+      listKey = pair[2] === "" ? pair[1] : "";
+      if (listKey) meta[listKey] = [];
+      else if (pair[2] === "true" || pair[2] === "false") meta[pair[1]] = pair[2] === "true";
+      else meta[pair[1]] = String(yamlValue(pair[2]));
+    }
+    return {
+      title: String(meta.title ?? ""),
+      description: String(meta.description ?? ""),
+      pubDate: String(meta.pubDate ?? new Date().toISOString().slice(0, 10)),
+      tags: Array.isArray(meta.tags) ? meta.tags : [],
+      category: String(meta.category ?? "Learning Notes"),
+      draft: Boolean(meta.draft),
+      featured: Boolean(meta.featured),
+      content: match?.[2]?.trimStart() ?? source
+    };
+  }
+
+  function serializePost(data: PostDraft) {
+    const tags = data.tags.length ? `\ntags:\n${data.tags.map((tag) => `  - ${JSON.stringify(tag)}`).join("\n")}` : "\ntags: []";
+    return `---\ntitle: ${JSON.stringify(data.title)}\ndescription: ${JSON.stringify(data.description)}\npubDate: ${data.pubDate}${tags}\ncategory: ${JSON.stringify(data.category)}\ndraft: ${data.draft}\nfeatured: ${data.featured}\n---\n\n${data.content.trim()}\n`;
+  }
+
+  function inlineMarkdown(value: string) {
+    const escaped = value
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;");
+    return escaped
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+  }
+
+  function renderMarkdown(source: string) {
+    if (!preview) return;
+    const lines = source.split(/\r?\n/);
+    const html: string[] = [];
+    let inCode = false;
+    let code: string[] = [];
+    let listOpen = false;
+    const closeList = () => { if (listOpen) { html.push("</ul>"); listOpen = false; } };
+    for (const line of lines) {
+      if (line.startsWith("```")) {
+        closeList();
+        if (inCode) {
+          html.push(`<pre><code>${code.join("\n").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")}</code></pre>`);
+          code = [];
+        }
+        inCode = !inCode;
+        continue;
+      }
+      if (inCode) { code.push(line); continue; }
+      const heading = line.match(/^(#{1,4})\s+(.+)$/);
+      if (heading) { closeList(); html.push(`<h${heading[1].length}>${inlineMarkdown(heading[2])}</h${heading[1].length}>`); continue; }
+      const item = line.match(/^[-*]\s+(.+)$/);
+      if (item) {
+        if (!listOpen) { html.push("<ul>"); listOpen = true; }
+        html.push(`<li>${inlineMarkdown(item[1])}</li>`);
+        continue;
+      }
+      closeList();
+      if (line.trim()) html.push(`<p>${inlineMarkdown(line)}</p>`);
+    }
+    closeList();
+    preview.innerHTML = html.join("") || '<p class="admin-preview-placeholder">预览会在这里实时显示。</p>';
+  }
+
+  function readForm(): PostDraft {
+    return {
+      title: field<HTMLInputElement>("title")?.value.trim() ?? "",
+      description: field<HTMLTextAreaElement>("description")?.value.trim() ?? "",
+      pubDate: field<HTMLInputElement>("pubDate")?.value ?? "",
+      tags: (field<HTMLInputElement>("tags")?.value ?? "").split(",").map((tag) => tag.trim()).filter(Boolean),
+      category: field<HTMLSelectElement>("category")?.value ?? "Learning Notes",
+      draft: field<HTMLInputElement>("draft")?.checked ?? false,
+      featured: field<HTMLInputElement>("featured")?.checked ?? false,
+      content: field<HTMLTextAreaElement>("content")?.value ?? ""
+    };
+  }
+
+  function fillForm(data: PostDraft, path = "", sha = "") {
+    activePath = path;
+    activeSha = sha;
+    const slug = path ? path.split("/").pop()?.replace(/\.mdx?$/, "") ?? "" : "";
+    const slugInput = field<HTMLInputElement>("slug");
+    if (slugInput) { slugInput.value = slug; slugInput.disabled = Boolean(path); }
+    const title = field<HTMLInputElement>("title"); if (title) title.value = data.title;
+    const description = field<HTMLTextAreaElement>("description"); if (description) description.value = data.description;
+    const date = field<HTMLInputElement>("pubDate"); if (date) date.value = data.pubDate.slice(0, 10);
+    const tags = field<HTMLInputElement>("tags"); if (tags) tags.value = data.tags.join(", ");
+    const category = field<HTMLSelectElement>("category"); if (category) category.value = data.category;
+    const draft = field<HTMLInputElement>("draft"); if (draft) draft.checked = data.draft;
+    const featured = field<HTMLInputElement>("featured"); if (featured) featured.checked = data.featured;
+    const content = field<HTMLTextAreaElement>("content"); if (content) content.value = data.content;
+    if (currentFile) currentFile.textContent = path || "未命名文章";
+    if (editorMode) editorMode.textContent = path ? "Editing" : "New draft";
+    if (deleteButton) deleteButton.hidden = !path;
+    dirty = false;
+    setStatus(path ? "已同步" : "尚未保存");
+    updatePreview();
+    renderPostList();
+  }
+
+  function newPost() {
+    fillForm({
+      title: "",
+      description: "",
+      pubDate: new Date().toISOString().slice(0, 10),
+      tags: [],
+      category: "Learning Notes",
+      draft: true,
+      featured: false,
+      content: "# 从这里开始写作\n"
+    });
+    field<HTMLInputElement>("title")?.focus();
+  }
+
+  function updatePreview() {
+    const content = field<HTMLTextAreaElement>("content")?.value ?? "";
+    renderMarkdown(content);
+    const count = document.querySelector<HTMLElement>("[data-word-count]");
+    if (count) count.textContent = `${content.replace(/\s/g, "").length} 字`;
+  }
+
+  function renderPostList(filter = "") {
+    if (!postList) return;
+    postList.replaceChildren();
+    const query = filter.trim().toLowerCase();
+    const visible = posts.filter((post) => post.name.toLowerCase().includes(query));
+    if (!visible.length) {
+      const empty = document.createElement("p");
+      empty.className = "admin-list-empty";
+      empty.textContent = posts.length ? "没有匹配的文章。" : "还没有文章。";
+      postList.append(empty);
+      return;
+    }
+    visible.forEach((post) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "admin-post-item";
+      button.dataset.active = String(post.path === activePath);
+      const name = document.createElement("strong");
+      name.textContent = post.name.replace(/\.mdx?$/, "");
+      const path = document.createElement("span");
+      path.textContent = post.path;
+      button.append(name, path);
+      button.addEventListener("click", () => loadPost(post));
+      postList.append(button);
+    });
+  }
+
+  async function loadPosts() {
+    if (!postList) return;
+    postList.innerHTML = '<p class="admin-list-empty">正在同步文章…</p>';
+    const result = await api<{ posts: PostSummary[] }>("/api/posts");
+    posts = result.posts;
+    renderPostList();
+  }
+
+  async function loadPost(post: PostSummary) {
+    if (dirty && !window.confirm("当前修改尚未保存，确定切换文章吗？")) return;
+    setStatus("正在读取…", "working");
+    try {
+      const result = await api<{ content: string; path: string; sha: string }>(`/api/post?path=${encodeURIComponent(post.path)}`);
+      fillForm(parsePost(result.content), result.path, result.sha);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "读取失败", "error");
+    }
+  }
+
+  async function savePost(event: SubmitEvent) {
+    event.preventDefault();
+    if (!form?.reportValidity()) return;
+    const slug = field<HTMLInputElement>("slug")?.value.trim() ?? "";
+    const path = activePath || `src/content/blog/${slug}.md`;
+    const data = readForm();
+    setStatus("正在提交…", "working");
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    if (submit) submit.disabled = true;
+    try {
+      const result = await api<{ path: string; sha: string }>("/api/post", {
+        method: "PUT",
+        body: JSON.stringify({ path, sha: activeSha || undefined, content: serializePost(data) })
+      });
+      activePath = result.path;
+      activeSha = result.sha;
+      dirty = false;
+      setStatus("已提交，网站正在更新", "success");
+      await loadPosts();
+      fillForm(data, result.path, result.sha);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "保存失败", "error");
+    } finally {
+      if (submit) submit.disabled = false;
+    }
+  }
+
+  async function deletePost() {
+    if (!activePath || !activeSha) return;
+    const title = field<HTMLInputElement>("title")?.value || activePath;
+    if (!window.confirm(`确定删除“${title}”吗？该操作会提交到 GitHub。`)) return;
+    setStatus("正在删除…", "working");
+    try {
+      await api("/api/post", { method: "DELETE", body: JSON.stringify({ path: activePath, sha: activeSha }) });
+      await loadPosts();
+      newPost();
+      setStatus("文章已删除", "success");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "删除失败", "error");
+    }
+  }
+
+  async function boot() {
+    const hash = new URLSearchParams(location.hash.slice(1));
+    const session = hash.get("session");
+    const authError = hash.get("auth_error");
+    if (session) sessionStorage.setItem(sessionKey, session);
+    if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+    if (authError) { showLogin("GitHub 登录失败，请重试。"); return; }
+    if (!apiBase || !getSession()) { showLogin(); return; }
+    try {
+      const identity = await api<{ login: string }>("/api/session");
+      showWorkspace(identity.login);
+      newPost();
+      await loadPosts();
+    } catch (error) {
+      showLogin(error instanceof Error ? error.message : "无法连接安全后端。");
+    }
+  }
+
+  document.querySelector<HTMLButtonElement>("[data-login]")?.addEventListener("click", () => {
+    location.href = `${apiBase}/auth/start`;
+  });
+  document.querySelector<HTMLButtonElement>("[data-logout]")?.addEventListener("click", () => {
+    clearSession();
+    location.reload();
+  });
+  document.querySelector<HTMLButtonElement>("[data-new-post]")?.addEventListener("click", () => {
+    if (!dirty || window.confirm("当前修改尚未保存，确定新建文章吗？")) newPost();
+  });
+  document.querySelector<HTMLInputElement>("[data-search]")?.addEventListener("input", (event) => {
+    renderPostList((event.currentTarget as HTMLInputElement).value);
+  });
+  form?.addEventListener("submit", savePost);
+  form?.addEventListener("input", () => {
+    dirty = true;
+    setStatus("有未保存修改");
+    updatePreview();
+  });
+  deleteButton?.addEventListener("click", deletePost);
+  window.addEventListener("beforeunload", (event) => {
+    if (!dirty) return;
+    event.preventDefault();
+  });
+
+  boot();
+</script>

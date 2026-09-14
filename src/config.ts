@@ -9,6 +9,7 @@ export const siteConfig = {
   author: "Zephyr",
   github: "https://github.com/urgenty07",
   email: "",
+  adminApi: "",
   site: "https://urgenty07.github.io",
   base: "/quantum-notes"
 } as const;
