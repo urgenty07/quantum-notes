@@ -1,0 +1,43 @@
+<div class="site-intro" data-site-intro aria-label="Zephyr 入场动画">
+  <button type="button" class="site-intro-skip" data-site-intro-skip>跳过</button>
+  <div class="site-intro-stage" aria-hidden="true">
+    <div class="site-intro-coordinate site-intro-coordinate-top">SYSTEM / PORTFOLIO</div>
+    <div class="site-intro-coordinate site-intro-coordinate-bottom">INITIALIZING EXPERIENCE</div>
+    <div class="site-intro-emblem">
+      <span class="site-intro-orbit"></span>
+      <span class="site-intro-axis site-intro-axis-x"></span>
+      <span class="site-intro-axis site-intro-axis-y"></span>
+      <span class="site-intro-mark">Ψ</span>
+    </div>
+    <div class="site-intro-wordmark">
+      <strong>ZEPHYR</strong>
+      <span>INDEPENDENT LAB</span>
+    </div>
+    <div class="site-intro-progress"><span></span></div>
+  </div>
+</div>
+
+<script>
+  const intro = document.querySelector<HTMLElement>("[data-site-intro]");
+  const skip = document.querySelector<HTMLButtonElement>("[data-site-intro-skip]");
+  let fallback: number | undefined;
+
+  function finishIntro() {
+    if (!intro || intro.dataset.finished === "true") return;
+    intro.dataset.finished = "true";
+    document.documentElement.dataset.intro = "done";
+    window.clearTimeout(fallback);
+    window.setTimeout(() => intro.remove(), 80);
+  }
+
+  if (intro && document.documentElement.dataset.intro === "play") {
+    try { sessionStorage.setItem("zephyr_site_intro_v1", "seen"); } catch {}
+    intro.addEventListener("animationend", (event) => {
+      if (event.target === intro && event.animationName === "site-intro-exit") finishIntro();
+    });
+    skip?.addEventListener("click", finishIntro);
+    fallback = window.setTimeout(finishIntro, 3200);
+  } else {
+    intro?.remove();
+  }
+</script>
