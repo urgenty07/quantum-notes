@@ -5,10 +5,66 @@ import PostCard from "../components/PostCard.astro";
 import { publishedPosts } from "../utils/content";
 
 const stackGroups = [
-  { index: "01", title: "Languages & Development", detail: "用于原型、工程实现与自动化。", items: ["Python", "TypeScript"] },
-  { index: "02", title: "Scientific Computing", detail: "数值计算、实验复现与高性能数组工作流。", items: ["NumPy", "SciPy", "JAX"] },
-  { index: "03", title: "Quantum & Tensor", detail: "量子算法、张量网络与模型实验。", items: ["PennyLane", "MPS", "DMRG", "Tensor Network"] },
-  { index: "04", title: "Web & Delivery", detail: "把内容和工具可靠地发布到线上。", items: ["Astro", "GitHub Actions", "Cloudflare Workers"] }
+  {
+    index: "01",
+    discipline: "Foundation",
+    title: "编程语言与基础",
+    detail: "用于算法原型、工程实现和自动化脚本。",
+    groups: [
+      { label: "Languages", items: ["Python", "TypeScript", "JavaScript"] },
+      { label: "Practice", items: ["Algorithm Prototyping", "Automation", "Tooling"] }
+    ]
+  },
+  {
+    index: "02",
+    discipline: "Numerics",
+    title: "科学计算",
+    detail: "覆盖数值实验、线性代数和可微分计算工作流。",
+    groups: [
+      { label: "Libraries", items: ["NumPy", "SciPy", "JAX"] },
+      { label: "Methods", items: ["Linear Algebra", "Automatic Differentiation"] }
+    ]
+  },
+  {
+    index: "03",
+    discipline: "Intelligence",
+    title: "AI 与智能系统",
+    detail: "面向个性化生成与多智能体协作的应用探索。",
+    groups: [
+      { label: "Systems", items: ["LLM Applications", "Multi-Agent Systems"] },
+      { label: "Focus", items: ["Personalized Generation", "Agent Workflow"] }
+    ]
+  },
+  {
+    index: "04",
+    discipline: "Quantum",
+    title: "量子计算",
+    detail: "研究变分算法、参数化量子电路与量子机器学习。",
+    groups: [
+      { label: "Framework", items: ["PennyLane"] },
+      { label: "Algorithms", items: ["VQE", "PQC", "Quantum Circuits"] }
+    ]
+  },
+  {
+    index: "05",
+    discipline: "Tensor",
+    title: "张量网络",
+    detail: "从表示、收缩到优化算法，服务于量子多体问题。",
+    groups: [
+      { label: "Models", items: ["MPS", "Tensor Network", "TensorGame"] },
+      { label: "Methods", items: ["DMRG", "Tensor Contraction"] }
+    ]
+  },
+  {
+    index: "06",
+    discipline: "Delivery",
+    title: "Web 工程与交付",
+    detail: "把研究内容与交互工具稳定地构建、发布和维护。",
+    groups: [
+      { label: "Web", items: ["Astro", "HTML / CSS", "Markdown"] },
+      { label: "Delivery", items: ["GitHub Actions", "Cloudflare Workers", "GitHub Pages"] }
+    ]
+  }
 ];
 const technicalCategories = new Set(["Tech Stack", "Engineering", "Programming"]);
 const technicalPosts = publishedPosts(await getCollection("blog")).filter((post) => technicalCategories.has(post.data.category));
@@ -24,10 +80,20 @@ const technicalPosts = publishedPosts(await getCollection("blog")).filter((post)
     <section class="stack-grid page-section section-compact" aria-label="技术栈">
       {stackGroups.map((group) => (
         <article class="stack-card">
-          <span>{group.index}</span>
+          <div class="stack-card-meta">
+            <span>{group.index}</span>
+            <span>{group.discipline}</span>
+          </div>
           <h2>{group.title}</h2>
           <p>{group.detail}</p>
-          <ul>{group.items.map((item) => <li>{item}</li>)}</ul>
+          <div class="stack-divisions">
+            {group.groups.map((division) => (
+              <div class="stack-division">
+                <h3>{division.label}</h3>
+                <ul>{division.items.map((item) => <li>{item}</li>)}</ul>
+              </div>
+            ))}
+          </div>
         </article>
       ))}
     </section>
