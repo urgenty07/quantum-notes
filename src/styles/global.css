@@ -189,25 +189,33 @@ main { min-height: calc(100vh - 14rem); }
 .research-reading-note a:hover { color: var(--accent-strong); }
 
 .competition-grid { display: grid; gap: 1rem; }
-.achievement-card { position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 97%, var(--accent)), var(--surface)); box-shadow: 0 1.5rem 4rem color-mix(in srgb, #000 18%, transparent); transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease; }
-.achievement-card::before { position: absolute; z-index: 2; top: 0; right: 0; left: 0; height: 2px; background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--blue) 65%, transparent), transparent 80%); content: ""; }
-.achievement-card::after { position: absolute; top: -8rem; right: -7rem; width: 22rem; height: 22rem; border: 1px solid color-mix(in srgb, var(--accent) 15%, transparent); border-radius: 50%; box-shadow: 0 0 0 4.5rem color-mix(in srgb, var(--accent) 2.5%, transparent), 0 0 0 9rem color-mix(in srgb, var(--blue) 1.5%, transparent); pointer-events: none; content: ""; }
-.achievement-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); box-shadow: 0 2rem 5rem color-mix(in srgb, #000 25%, transparent); }
-.achievement-card header { position: relative; z-index: 1; display: flex; padding: 1.25rem 1.5rem; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--border); }
-.achievement-card header > span, .achievement-card header time, .achievement-project > span, .achievement-result > span, .achievement-card footer { color: var(--faint); font: 0.72rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.1em; text-transform: uppercase; }
-.achievement-card header time { color: var(--accent-strong); }
-.achievement-layout { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(21rem, 0.92fr); }
-.achievement-main { display: flex; min-height: 29rem; padding: clamp(2.25rem, 5vw, 4.5rem); justify-content: center; flex-direction: column; }
-.achievement-main > p { margin: 0 0 0.85rem; color: var(--accent-strong); font-size: 0.88rem; font-weight: 700; letter-spacing: 0.035em; }
-.achievement-main h2 { max-width: 15ch; margin: 0; font-size: clamp(2rem, 3.5vw, 3.25rem); line-height: 1.08; letter-spacing: -0.055em; text-wrap: balance; }
-.achievement-result { display: flex; width: fit-content; margin-top: 2.4rem; padding: 0.7rem 0.8rem 0.7rem 1rem; align-items: center; gap: 1.2rem; border: 1px solid color-mix(in srgb, var(--accent) 36%, var(--border)); border-radius: 999px; background: color-mix(in srgb, var(--accent) 6%, transparent); }
-.achievement-result strong { color: var(--accent-strong); font-size: 1rem; }
-.achievement-project { display: flex; min-width: 0; padding: clamp(2rem, 4vw, 3.5rem); justify-content: center; flex-direction: column; border-left: 1px solid var(--border); background: color-mix(in srgb, var(--surface-soft) 46%, transparent); }
-.achievement-project h3 { margin: 1rem 0 0.8rem; font-size: clamp(1.15rem, 2vw, 1.45rem); line-height: 1.5; letter-spacing: -0.03em; text-wrap: pretty; }
-.achievement-project p { margin: 0; color: var(--muted); font-size: 1rem; line-height: 1.75; }
-.achievement-project ul { display: flex; flex-wrap: wrap; margin: 2rem 0 0; padding: 0; gap: 0.5rem; list-style: none; }
-.achievement-project li { padding: 0.38rem 0.68rem; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); background: color-mix(in srgb, var(--surface) 70%, transparent); font-size: 0.78rem; font-weight: 650; }
-.achievement-card footer { position: relative; z-index: 1; display: flex; padding: 1rem 1.5rem; align-items: center; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--border); }
+.achievement-certificate { --certificate-ink: #27231c; --certificate-muted: #756a56; --certificate-gold: #a87827; --certificate-line: #c9ab6c; position: relative; padding: 0.72rem; border: 1px solid #806426; border-radius: 0.4rem; color: var(--certificate-ink); background: linear-gradient(135deg, #a77c2d, #e0c27c 46%, #896522); box-shadow: 0 1.8rem 5rem color-mix(in srgb, #000 36%, transparent); transition: transform 240ms ease, box-shadow 240ms ease; }
+.achievement-certificate:hover { transform: translateY(-3px); box-shadow: 0 2.2rem 6rem color-mix(in srgb, #000 44%, transparent); }
+.certificate-frame { position: relative; overflow: hidden; padding: clamp(1.1rem, 2.5vw, 2rem); border: 1px solid var(--certificate-gold); outline: 4px double color-mix(in srgb, var(--certificate-gold) 68%, #fff); outline-offset: -0.72rem; background: linear-gradient(135deg, rgba(168, 120, 39, 0.045), transparent 38%, rgba(168, 120, 39, 0.055)), repeating-linear-gradient(0deg, rgba(99, 78, 42, 0.018) 0, rgba(99, 78, 42, 0.018) 1px, transparent 1px, transparent 5px), #f6efdd; }
+.certificate-frame::before, .certificate-frame::after { position: absolute; width: 6rem; height: 6rem; border-color: var(--certificate-line); opacity: 0.72; pointer-events: none; content: ""; }
+.certificate-frame::before { top: 1.25rem; left: 1.25rem; border-top: 2px solid; border-left: 2px solid; }
+.certificate-frame::after { right: 1.25rem; bottom: 1.25rem; border-right: 2px solid; border-bottom: 2px solid; }
+.certificate-head { position: relative; z-index: 1; display: flex; padding: 0.45rem 0.75rem 1rem; align-items: center; justify-content: space-between; gap: 1rem; color: var(--certificate-muted); font: 0.7rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.12em; text-transform: uppercase; }
+.certificate-head time { color: var(--certificate-gold); font-weight: 800; }
+.certificate-body { position: relative; z-index: 1; max-width: 70rem; margin: 0 auto; padding: clamp(2.5rem, 5vw, 4.5rem) clamp(1rem, 4vw, 3rem) clamp(2rem, 4vw, 3.5rem); text-align: center; }
+.certificate-kicker { margin: 0 0 0.65rem; color: var(--certificate-gold); font: 0.72rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; font-weight: 750; letter-spacing: 0.24em; text-transform: uppercase; }
+.certificate-body > h2 { margin: 0; color: #9b6b1f; font-family: Georgia, "Noto Serif SC", "Songti SC", serif; font-size: clamp(2.4rem, 5vw, 4.25rem); font-weight: 600; line-height: 1.05; letter-spacing: 0.16em; text-indent: 0.16em; }
+.certificate-rule { display: flex; width: min(22rem, 70%); margin: 1.5rem auto 2rem; align-items: center; gap: 0.75rem; color: var(--certificate-line); }
+.certificate-rule::before, .certificate-rule::after { height: 1px; flex: 1; background: currentColor; content: ""; }
+.certificate-rule span { width: 0.55rem; height: 0.55rem; transform: rotate(45deg); border: 1px solid currentColor; }
+.certificate-intro { margin: 0 0 0.75rem; color: var(--certificate-muted); font-family: Georgia, "Noto Serif SC", "Songti SC", serif; font-size: 1rem; }
+.certificate-body > h3 { max-width: 23ch; margin: 0 auto; font-family: Georgia, "Noto Serif SC", "Songti SC", serif; font-size: clamp(1.45rem, 3vw, 2.35rem); font-weight: 650; line-height: 1.42; letter-spacing: 0.01em; text-wrap: balance; }
+.certificate-group { margin: 1rem 0 0; color: var(--certificate-muted); font-size: 0.95rem; }
+.certificate-result { display: inline-flex; margin-top: 1.75rem; padding: 0.75rem 1.15rem; align-items: center; gap: 1rem; border-top: 1px solid var(--certificate-line); border-bottom: 1px solid var(--certificate-line); color: var(--certificate-muted); }
+.certificate-result span { font-family: Georgia, "Noto Serif SC", "Songti SC", serif; font-size: 0.9rem; }
+.certificate-result strong { color: #8e5b14; font-family: Georgia, "Noto Serif SC", "Songti SC", serif; font-size: clamp(1.45rem, 3vw, 2rem); letter-spacing: 0.12em; }
+.certificate-project { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto; margin: 0 clamp(0.25rem, 2vw, 1.25rem); padding: clamp(1.35rem, 3vw, 2rem); align-items: end; gap: 2rem; border-top: 1px solid rgba(168, 120, 39, 0.32); background: rgba(168, 120, 39, 0.055); }
+.certificate-project > div > span, .certificate-footer { color: var(--certificate-muted); font: 0.7rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.1em; text-transform: uppercase; }
+.certificate-project h4 { max-width: 45rem; margin: 0.65rem 0 0.45rem; font-size: clamp(1.05rem, 2vw, 1.3rem); line-height: 1.45; letter-spacing: -0.02em; }
+.certificate-project p { max-width: 48rem; margin: 0; color: var(--certificate-muted); font-size: 0.92rem; line-height: 1.7; }
+.certificate-project ul { display: flex; flex-wrap: wrap; justify-content: flex-end; margin: 0; padding: 0; gap: 0.45rem; list-style: none; }
+.certificate-project li { padding: 0.35rem 0.65rem; border: 1px solid rgba(168, 120, 39, 0.38); border-radius: 999px; color: #76501a; background: rgba(255, 255, 255, 0.26); font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+.certificate-footer { position: relative; z-index: 1; display: flex; padding: 1.25rem 0.75rem 0.45rem; align-items: center; justify-content: space-between; gap: 1rem; }
 
 .post-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
 .post-list { display: grid; gap: 1rem; }
@@ -443,11 +451,11 @@ body:has(.admin-page) .site-footer { display: none; }
   .about-panel { padding: 2rem 1.5rem; gap: 2rem; }
   .about-heading > span { display: none; }
   .research-reading-note { grid-template-columns: 1fr; gap: 0.65rem; }
-  .achievement-layout { grid-template-columns: 1fr; }
-  .achievement-main { min-height: auto; padding: 3rem 1.5rem; }
-  .achievement-project { padding: 2.5rem 1.5rem; border-top: 1px solid var(--border); border-left: 0; }
-  .achievement-card::after { opacity: 0.55; }
-  .achievement-card footer { align-items: start; flex-direction: column; gap: 0.35rem; }
+  .certificate-frame { padding: 1rem; }
+  .certificate-body { padding: 3rem 0.75rem 2.5rem; }
+  .certificate-project { grid-template-columns: 1fr; align-items: start; gap: 1.5rem; }
+  .certificate-project ul { justify-content: flex-start; }
+  .certificate-footer { align-items: start; flex-direction: column; gap: 0.35rem; }
   .empty-state { min-height: 18rem; padding: 3rem 1.25rem; }
   .page-title { padding-block: 5rem 3rem; }
   .article-shell { padding-block: 4.5rem; }
@@ -460,6 +468,10 @@ body:has(.admin-page) .site-footer { display: none; }
 @media (max-width: 430px) {
   .header-actions > .icon-button:first-child { display: none; }
   .hero h1 { font-size: clamp(2.75rem, 15vw, 3.6rem); }
+  .achievement-certificate { padding: 0.48rem; }
+  .certificate-frame { outline-offset: -0.48rem; }
+  .certificate-head { align-items: start; flex-direction: column; gap: 0.25rem; }
+  .certificate-body > h2 { letter-spacing: 0.08em; text-indent: 0.08em; }
   .console-list div { grid-template-columns: 3.8rem 1fr; }
   .post-card-footer { align-items: start; flex-direction: column; gap: 0.4rem; }
   .reading-time { align-self: flex-end; }
