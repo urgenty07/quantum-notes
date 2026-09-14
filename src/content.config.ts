@@ -11,6 +11,9 @@ const blog = defineCollection({
     updatedDate: z.coerce.date().optional(),
     tags: z.array(z.string()).default([]),
     category: z.enum([
+      "Tech Stack",
+      "Competitions",
+      "Research",
       "Projects",
       "Engineering",
       "Programming",

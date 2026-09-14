@@ -3,6 +3,9 @@ import type { CollectionEntry } from "astro:content";
 export type BlogPost = CollectionEntry<"blog">;
 
 export const categoryMap = {
+  "tech-stack": "Tech Stack",
+  competitions: "Competitions",
+  research: "Research",
   projects: "Projects",
   engineering: "Engineering",
   programming: "Programming",

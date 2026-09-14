@@ -2,17 +2,15 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostCard from "../components/PostCard.astro";
-import ProjectCard from "../components/ProjectCard.astro";
-import { projects } from "../data/projects";
 import { publishedPosts, withBase } from "../utils/content";
 
 const posts = publishedPosts(await getCollection("blog"));
 const latestPosts = posts.slice(0, 3);
-const focusAreas = [
-  { title: "Personal Projects", detail: "把想法变成可运行、可迭代的作品。" },
-  { title: "Code & Systems", detail: "记录工程实践、工具链与编程思考。" },
-  { title: "Quantum Computing", detail: "探索计算、算法与量子软件。" },
-  { title: "Research Reading", detail: "论文阅读只是持续学习的一部分。" }
+const pillars = [
+  { href: "/stack", label: "Stack", title: "我的技术栈", detail: "语言、科学计算、量子软件与 Web 工具链。", meta: "Languages · Tools · Systems" },
+  { href: "/competitions", label: "Contests", title: "我的竞赛", detail: "赛事经历、解题过程、协作角色与赛后复盘。", meta: "Practice · Review · Growth" },
+  { href: "/research", label: "Research", title: "我的科研", detail: "研究方向、实验进展与阶段性理解；论文阅读只是其中一部分。", meta: "Quantum · Tensor · QML" },
+  { href: "/projects", label: "Projects", title: "我的项目", detail: "从原型、实现到持续维护的完整作品。", meta: "Build · Ship · Iterate" }
 ];
 ---
 
@@ -20,13 +18,13 @@ const focusAreas = [
   <section class="hero">
     <div class="hero-inner container">
       <div class="hero-copy">
-        <p class="section-kicker">Independent developer · field notes</p>
-        <h1>Build ideas.<br /><span>Leave a trace.</span></h1>
-        <p class="hero-lead">把想法做成作品，也把探索过程留在这里。</p>
-        <p class="hero-detail">一个关于个人项目、代码与系统、量子计算和持续学习的技术空间。</p>
+        <p class="section-kicker">Independent developer · research builder</p>
+        <h1>Learn deeply.<br /><span>Build boldly.</span></h1>
+        <p class="hero-lead">技术、竞赛、科研与项目，构成同一条成长路径。</p>
+        <p class="hero-detail">这里记录能力如何形成、问题如何被解决，以及想法如何变成真正可运行的作品。</p>
         <div class="hero-actions">
-          <a class="button" href={withBase("/projects")}><span>查看项目</span><span aria-hidden="true">↗</span></a>
-          <a class="button secondary" href={withBase("/blog")}>浏览笔记</a>
+          <a class="button" href="#pillars"><span>探索四个方向</span><span aria-hidden="true">↓</span></a>
+          <a class="button secondary" href={withBase("/projects")}>查看项目</a>
         </div>
       </div>
       <aside class="hero-console" aria-label="当前关注方向">
@@ -42,9 +40,10 @@ const focusAreas = [
           <span class="axis axis-y"></span>
         </div>
         <dl class="console-list">
-          <div><dt>Build</dt><dd>Personal tools & experiments</dd></div>
-          <div><dt>Explore</dt><dd>Code · Systems · Quantum</dd></div>
-          <div><dt>Write</dt><dd>Notes in progress</dd></div>
+          <div><dt>Stack</dt><dd>Languages · Tools · Systems</dd></div>
+          <div><dt>Compete</dt><dd>Practice · Strategy · Review</dd></div>
+          <div><dt>Research</dt><dd>Quantum · Tensor · QML</dd></div>
+          <div><dt>Build</dt><dd>Projects that keep evolving</dd></div>
         </dl>
       </aside>
       <div class="hero-caption" aria-hidden="true">
@@ -53,33 +52,28 @@ const focusAreas = [
     </div>
   </section>
 
-  <section class="page-section container" aria-labelledby="focus-title">
+  <section class="page-section container" id="pillars" aria-labelledby="focus-title">
     <div class="section-heading">
-      <div><p class="section-kicker">Explore / 01</p><h2 id="focus-title">我在做什么</h2></div>
-      <p>从工程实践到长期研究，保持开放的兴趣边界。</p>
+      <div><p class="section-kicker">Explore / 01</p><h2 id="focus-title">四个方向</h2></div>
+      <p>不是四个孤立栏目，而是从学习、实战、探索到交付的完整闭环。</p>
     </div>
-    <div class="focus-grid">
-      {focusAreas.map((item, index) => (
-        <article class="focus-item">
+    <div class="pillar-grid">
+      {pillars.map((item, index) => (
+        <a class="pillar-card" href={withBase(item.href)}>
           <span class="focus-number">0{index + 1}</span>
+          <span class="pillar-label">{item.label}</span>
           <h3>{item.title}</h3>
           <p>{item.detail}</p>
-        </article>
+          <small>{item.meta}</small>
+          <span class="pillar-arrow" aria-hidden="true">↗</span>
+        </a>
       ))}
     </div>
   </section>
 
-  <section class="page-section container" aria-labelledby="projects-title">
-    <div class="section-heading">
-      <div><p class="section-kicker">Building / 02</p><h2 id="projects-title">正在构建</h2></div>
-      <a href={withBase("/projects")}>全部项目 <span aria-hidden="true">↗</span></a>
-    </div>
-    <div class="projects-grid">{projects.map((project, index) => <ProjectCard project={project} index={index + 1} />)}</div>
-  </section>
-
   <section class="page-section container" aria-labelledby="latest-title">
     <div class="section-heading">
-      <div><p class="section-kicker">Notes / 03</p><h2 id="latest-title">最近笔记</h2></div>
+      <div><p class="section-kicker">Recent / 02</p><h2 id="latest-title">最近更新</h2></div>
       <a href={withBase("/blog")}>全部笔记 <span aria-hidden="true">↗</span></a>
     </div>
     <div class="post-grid">{latestPosts.map((post) => <PostCard post={post} />)}</div>
@@ -87,10 +81,10 @@ const focusAreas = [
 
   <section class="page-section container" aria-labelledby="about-title">
     <div class="about-panel">
-      <div class="about-heading"><p class="section-kicker">About / 04</p><h2 id="about-title">做项目，<br />也记录过程。</h2><span aria-hidden="true">Z / 04</span></div>
+      <div class="about-heading"><p class="section-kicker">About / 03</p><h2 id="about-title">让成长，<br />留下结构。</h2><span aria-hidden="true">Z / 04</span></div>
       <div>
-        <p class="about-lead">这里不是单一主题的知识库，而是一张持续生长的个人技术地图。</p>
-        <p>用于发布项目、整理代码与工程经验，也记录量子计算、论文阅读和算法实现中的学习过程。</p>
+        <p class="about-lead">这里不是单一主题的论文笔记库，而是一张持续生长的个人能力地图。</p>
+        <p>技术栈提供方法，竞赛锻炼实战，科研推进探索，项目沉淀结果。</p>
         <div class="hero-actions"><a class="button secondary" href={withBase("/about")}>关于我</a></div>
       </div>
     </div>

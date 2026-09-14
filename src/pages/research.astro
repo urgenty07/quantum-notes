@@ -1,0 +1,38 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostCard from "../components/PostCard.astro";
+import { publishedPosts, withBase } from "../utils/content";
+
+const researchAreas = [
+  { index: "01", title: "Tensor Networks", detail: "MPS、DMRG、张量收缩与可解释的数值实现。" },
+  { index: "02", title: "Quantum Algorithms", detail: "变分算法、量子电路优化与经典—量子接口。" },
+  { index: "03", title: "Quantum Machine Learning", detail: "参数化量子电路、表示学习与实验验证。" }
+];
+const researchCategories = new Set(["Research", "Quantum Computing", "Tensor Network", "Quantum Machine Learning", "Paper Reading"]);
+const researchPosts = publishedPosts(await getCollection("blog")).filter((post) => researchCategories.has(post.data.category));
+---
+
+<BaseLayout title="Research" description="我的研究方向、实验进展与阶段性理解。">
+  <div class="container">
+    <header class="page-title">
+      <p class="section-kicker">Pillar 03 / Exploration</p>
+      <h1>我的科研</h1>
+      <p>以问题、实验和实现为主线；论文阅读保留为支撑研究的小栏目。</p>
+    </header>
+    <section class="domain-grid page-section section-compact" aria-label="研究方向">
+      {researchAreas.map((area) => (
+        <article class="domain-card"><span>{area.index}</span><h2>{area.title}</h2><p>{area.detail}</p></article>
+      ))}
+    </section>
+    <section class="research-reading-note">
+      <span>Paper reading</span>
+      <p>论文阅读只占科研板块的一部分，用来记录关键方法、可复现细节与它对当前问题的启发。</p>
+      <a href={withBase("/categories/paper-reading")}>查看论文阅读 ↗</a>
+    </section>
+    <section class="page-section" aria-labelledby="research-notes-title">
+      <div class="section-heading"><div><p class="section-kicker">Research log</p><h2 id="research-notes-title">研究记录</h2></div><a href={withBase("/blog")}>全部笔记 ↗</a></div>
+      <div class="post-grid">{researchPosts.map((post) => <PostCard post={post} />)}</div>
+    </section>
+  </div>
+</BaseLayout>

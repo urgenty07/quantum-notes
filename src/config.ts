@@ -5,7 +5,7 @@
  */
 export const siteConfig = {
   title: "Zephyr",
-  description: "Projects · Code · Quantum · Notes",
+  description: "Tech Stack · Competitions · Research · Projects",
   author: "Zephyr",
   github: "https://github.com/urgenty07",
   email: "",

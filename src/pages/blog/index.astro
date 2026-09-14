@@ -7,12 +7,12 @@ import { categoryMap, publishedPosts, withBase } from "../../utils/content";
 const posts = publishedPosts(await getCollection("blog"));
 ---
 
-<BaseLayout title="Notes" description="项目实践、代码、系统、量子计算与持续学习笔记。">
+<BaseLayout title="Notes" description="技术、竞赛、科研与项目中的过程记录。">
   <div class="container">
     <header class="page-title">
       <p class="section-kicker">Index / Writing</p>
       <h1>Notes</h1>
-      <p>记录项目实践、代码与系统，也保留研究阅读中尚在生长的理解。</p>
+      <p>四个方向中的过程记录汇集于此；它们是经历和成果的上下文，而不是网站唯一的主体。</p>
     </header>
     <nav class="taxonomy-links" aria-label="文章分类">
       {Object.entries(categoryMap).map(([slug, label]) => <a href={withBase(`/categories/${slug}`)}>{label}</a>)}

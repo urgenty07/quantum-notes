@@ -159,6 +159,35 @@ main { min-height: calc(100vh - 14rem); }
 .focus-item h3 { margin: 3.2rem 0 0; font-size: 1rem; line-height: 1.35; letter-spacing: -0.02em; }
 .focus-item p { max-width: 14rem; margin: 0.65rem 0 0; color: var(--muted); font-size: 0.84rem; line-height: 1.62; }
 
+.pillar-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.pillar-card { position: relative; display: grid; min-height: 17rem; padding: 1.6rem; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 95%, transparent), color-mix(in srgb, var(--surface-soft) 74%, transparent)); transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
+.pillar-card::before { position: absolute; inset: auto -4rem -5rem auto; width: 12rem; height: 12rem; border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent); border-radius: 50%; box-shadow: 0 0 0 2.4rem color-mix(in srgb, var(--blue) 3%, transparent); content: ""; transition: transform 280ms ease; }
+.pillar-card:hover { transform: translateY(-4px); border-color: var(--border-strong); box-shadow: var(--shadow-lg); }
+.pillar-card:hover::before { transform: translate(-0.6rem, -0.45rem) scale(1.08); }
+.pillar-label { position: absolute; top: 1.7rem; right: 1.7rem; color: var(--faint); font: 0.68rem/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.1em; text-transform: uppercase; }
+.pillar-card h3 { align-self: end; margin: 3.4rem 0 0; font-size: clamp(1.55rem, 3vw, 2.25rem); line-height: 1.1; letter-spacing: -0.05em; }
+.pillar-card p { position: relative; z-index: 1; max-width: 28rem; margin: 0.75rem 0 1.5rem; color: var(--muted); font-size: 0.9rem; }
+.pillar-card small { align-self: end; color: var(--faint); font: 0.68rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.05em; text-transform: uppercase; }
+.pillar-arrow { position: absolute; right: 1.5rem; bottom: 1.35rem; z-index: 1; color: var(--accent-strong); font-size: 1.2rem; transition: transform 180ms ease; }
+.pillar-card:hover .pillar-arrow { transform: translate(3px, -3px); }
+
+.stack-grid, .domain-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.stack-card, .domain-card { position: relative; min-height: 17rem; padding: 1.6rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.stack-card > span, .domain-card > span, .empty-state > span, .research-reading-note > span { color: var(--accent-strong); font: 0.69rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.1em; text-transform: uppercase; }
+.stack-card h2, .domain-card h2, .empty-state h2 { margin: 3.3rem 0 0.65rem; font-size: 1.35rem; line-height: 1.2; letter-spacing: -0.035em; }
+.stack-card p, .domain-card p, .empty-state p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.stack-card ul { display: flex; flex-wrap: wrap; margin: 2rem 0 0; padding: 0; gap: 0.45rem; list-style: none; }
+.stack-card li { padding: 0.32rem 0.62rem; border: 1px solid var(--border); border-radius: 999px; color: var(--text); background: var(--surface-soft); font-size: 0.76rem; font-weight: 650; }
+.domain-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.domain-card { min-height: 15rem; }
+.empty-state { margin-top: 1rem; padding-inline: clamp(1.5rem, 6vw, 5rem); border: 1px solid var(--border); border-radius: var(--radius); background: linear-gradient(135deg, var(--surface), color-mix(in srgb, var(--surface-soft) 70%, transparent)); }
+.empty-state h2 { margin-top: 2.2rem; font-size: clamp(1.8rem, 4vw, 2.8rem); }
+.empty-state p { max-width: 42rem; }
+.research-reading-note { display: grid; grid-template-columns: 9rem minmax(0, 1fr) auto; align-items: center; padding: 1.4rem 1.6rem; gap: 1.5rem; border-top: 1px solid var(--border-strong); border-bottom: 1px solid var(--border-strong); }
+.research-reading-note p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+.research-reading-note a { font-size: 0.8rem; font-weight: 720; white-space: nowrap; }
+.research-reading-note a:hover { color: var(--accent-strong); }
+
 .post-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
 .post-list { display: grid; gap: 1rem; }
 .post-card { --pointer-x: 50%; --pointer-y: 50%; position: relative; min-width: 0; min-height: 19rem; padding: 1.55rem; border: 1px solid var(--border); border-radius: var(--radius); background: radial-gradient(circle at var(--pointer-x) var(--pointer-y), color-mix(in srgb, var(--accent) 9%, transparent), transparent 42%), var(--surface); transform: perspective(1000px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) translateY(var(--lift, 0px)); transform-style: preserve-3d; transition: transform 160ms ease-out, border-color 200ms ease, box-shadow 200ms ease; will-change: transform; }
@@ -365,6 +394,7 @@ body:has(.admin-page) .site-footer { display: none; }
   .focus-item:nth-child(2) { border-right: 0; }
   .focus-item:nth-child(n + 3) { border-top: 1px solid var(--border); }
   .post-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .domain-grid { grid-template-columns: 1fr; }
   .article-shell { grid-template-columns: minmax(0, 49rem); }
   .toc { display: none; }
 }
@@ -383,7 +413,7 @@ body:has(.admin-page) .site-footer { display: none; }
   .console-visual { height: 12rem; }
   .section-heading { align-items: start; flex-direction: column; gap: 1rem; }
   .section-heading > p { text-align: left; }
-  .focus-grid, .post-grid, .projects-grid, .about-panel { grid-template-columns: 1fr; }
+  .focus-grid, .pillar-grid, .stack-grid, .post-grid, .projects-grid, .about-panel { grid-template-columns: 1fr; }
   .focus-item { min-height: 11rem; border-right: 0; border-bottom: 1px solid var(--border); }
   .focus-item:nth-child(n + 3) { border-top: 0; }
   .focus-item:last-child { border-bottom: 0; }
@@ -391,6 +421,7 @@ body:has(.admin-page) .site-footer { display: none; }
   .post-card { min-height: 18rem; }
   .about-panel { padding: 2rem 1.5rem; gap: 2rem; }
   .about-heading > span { display: none; }
+  .research-reading-note { grid-template-columns: 1fr; gap: 0.65rem; }
   .page-title { padding-block: 5rem 3rem; }
   .article-shell { padding-block: 4.5rem; }
   .article-header h1 { font-size: clamp(2.25rem, 12vw, 3.2rem); }

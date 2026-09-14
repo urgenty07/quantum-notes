@@ -1,0 +1,41 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostCard from "../components/PostCard.astro";
+import { publishedPosts } from "../utils/content";
+
+const stackGroups = [
+  { index: "01", title: "Languages & Development", detail: "用于原型、工程实现与自动化。", items: ["Python", "TypeScript"] },
+  { index: "02", title: "Scientific Computing", detail: "数值计算、实验复现与高性能数组工作流。", items: ["NumPy", "SciPy", "JAX"] },
+  { index: "03", title: "Quantum & Tensor", detail: "量子算法、张量网络与模型实验。", items: ["PennyLane", "MPS", "DMRG", "Tensor Network"] },
+  { index: "04", title: "Web & Delivery", detail: "把内容和工具可靠地发布到线上。", items: ["Astro", "GitHub Actions", "Cloudflare Workers"] }
+];
+const technicalCategories = new Set(["Tech Stack", "Engineering", "Programming"]);
+const technicalPosts = publishedPosts(await getCollection("blog")).filter((post) => technicalCategories.has(post.data.category));
+---
+
+<BaseLayout title="Tech Stack" description="我的开发语言、科学计算工具、量子软件与交付工具链。">
+  <div class="container">
+    <header class="page-title">
+      <p class="section-kicker">Pillar 01 / Capabilities</p>
+      <h1>我的技术栈</h1>
+      <p>技术不是关键词清单，而是解决问题时能够组合使用的一套方法。</p>
+    </header>
+    <section class="stack-grid page-section section-compact" aria-label="技术栈">
+      {stackGroups.map((group) => (
+        <article class="stack-card">
+          <span>{group.index}</span>
+          <h2>{group.title}</h2>
+          <p>{group.detail}</p>
+          <ul>{group.items.map((item) => <li>{item}</li>)}</ul>
+        </article>
+      ))}
+    </section>
+    {technicalPosts.length > 0 && (
+      <section class="page-section" aria-labelledby="stack-notes-title">
+        <div class="section-heading"><div><p class="section-kicker">Practice</p><h2 id="stack-notes-title">相关记录</h2></div></div>
+        <div class="post-grid">{technicalPosts.map((post) => <PostCard post={post} />)}</div>
+      </section>
+    )}
+  </div>
+</BaseLayout>

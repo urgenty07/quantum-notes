@@ -1,0 +1,29 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostCard from "../components/PostCard.astro";
+import { publishedPosts } from "../utils/content";
+
+const competitionPosts = publishedPosts(await getCollection("blog")).filter((post) => post.data.category === "Competitions");
+---
+
+<BaseLayout title="Competitions" description="我的竞赛经历、解题过程与赛后复盘。">
+  <div class="container">
+    <header class="page-title">
+      <p class="section-kicker">Pillar 02 / Practice</p>
+      <h1>我的竞赛</h1>
+      <p>关注问题拆解、策略选择、团队协作和实战中形成的判断。</p>
+    </header>
+    {competitionPosts.length > 0 ? (
+      <section class="post-list page-section" aria-label="竞赛记录">
+        {competitionPosts.map((post) => <PostCard post={post} />)}
+      </section>
+    ) : (
+      <section class="empty-state page-section section-compact">
+        <span>02 / Awaiting records</span>
+        <h2>竞赛记录待补充</h2>
+        <p>这里会按赛事整理目标、角色、过程、结果与复盘；在管理后台把文章分类设为 Competitions 即可出现。</p>
+      </section>
+    )}
+  </div>
+</BaseLayout>
