@@ -22,12 +22,16 @@
   const currentFile = document.querySelector<HTMLElement>("[data-current-file]");
   const editorMode = document.querySelector<HTMLElement>("[data-editor-mode]");
   const deleteButton = document.querySelector<HTMLButtonElement>("[data-delete]");
+  const importInput = document.querySelector<HTMLInputElement>("[data-import-file]");
+  const extensionLabel = document.querySelector<HTMLElement>("[data-file-extension]");
   const sessionKey = "zephyr_blog_admin_session";
   const apiBase = app?.dataset.apiBase?.replace(/\/$/, "") ?? "";
+  const maxImportBytes = 750_000;
 
   let posts: PostSummary[] = [];
   let activePath = "";
   let activeSha = "";
+  let newFileExtension: ".md" | ".mdx" = ".md";
   let dirty = false;
 
   const field = <T extends HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(name: string) =>
@@ -189,12 +193,14 @@
     };
   }
 
-  function fillForm(data: PostDraft, path = "", sha = "") {
+  function fillForm(data: PostDraft, path = "", sha = "", extension: ".md" | ".mdx" = ".md") {
     activePath = path;
     activeSha = sha;
+    newFileExtension = path.endsWith(".mdx") || (!path && extension === ".mdx") ? ".mdx" : ".md";
     const slug = path ? path.split("/").pop()?.replace(/\.mdx?$/, "") ?? "" : "";
     const slugInput = field<HTMLInputElement>("slug");
     if (slugInput) { slugInput.value = slug; slugInput.disabled = Boolean(path); }
+    if (extensionLabel) extensionLabel.textContent = newFileExtension;
     const title = field<HTMLInputElement>("title"); if (title) title.value = data.title;
     const description = field<HTMLTextAreaElement>("description"); if (description) description.value = data.description;
     const date = field<HTMLInputElement>("pubDate"); if (date) date.value = data.pubDate.slice(0, 10);
@@ -224,6 +230,63 @@
       content: "# 从这里开始写作\n"
     });
     field<HTMLInputElement>("title")?.focus();
+  }
+
+  function slugify(value: string) {
+    const slug = value
+      .normalize("NFKD")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80);
+    if (slug) return slug;
+    const now = new Date();
+    return `post-${now.toISOString().slice(0, 10)}-${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`;
+  }
+
+  function inferImportedDraft(source: string, fileName: string) {
+    const parsed = parsePost(source);
+    const baseName = fileName.replace(/\.mdx?$/i, "");
+    const firstHeading = parsed.content.match(/^#\s+(.+)$/m)?.[1]?.trim() ?? "";
+    const firstParagraph = parsed.content
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .find((line) => line && !line.startsWith("#") && !line.startsWith("```") && line !== "---") ?? "";
+    const validCategories = Array.from(field<HTMLSelectElement>("category")?.options ?? []).map((option) => option.value);
+    return {
+      draft: {
+        ...parsed,
+        title: parsed.title || firstHeading || baseName,
+        description: parsed.description || firstParagraph.replace(/^[-*>]\s*/, "").slice(0, 180),
+        category: validCategories.includes(parsed.category) ? parsed.category : "Learning Notes"
+      },
+      slug: slugify(baseName)
+    };
+  }
+
+  async function importMarkdown() {
+    const file = importInput?.files?.[0];
+    if (!file) return;
+    try {
+      if (!/\.mdx?$/i.test(file.name)) throw new Error("请选择 .md 或 .mdx 文件。");
+      if (file.size > maxImportBytes) throw new Error("文件不能超过 750 KB。");
+      if (dirty && !window.confirm("当前修改尚未保存，确定导入文件并覆盖编辑区吗？")) return;
+      const source = await file.text();
+      const imported = inferImportedDraft(source, file.name);
+      const extension = file.name.toLowerCase().endsWith(".mdx") ? ".mdx" : ".md";
+      fillForm(imported.draft, "", "", extension);
+      const slugInput = field<HTMLInputElement>("slug");
+      if (slugInput) slugInput.value = imported.slug;
+      if (currentFile) currentFile.textContent = `待保存 · ${file.name}`;
+      if (editorMode) editorMode.textContent = "Imported";
+      dirty = true;
+      setStatus("已导入，请检查后保存", "success");
+      field<HTMLInputElement>("title")?.focus();
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "导入失败", "error");
+    } finally {
+      if (importInput) importInput.value = "";
+    }
   }
 
   function updatePreview() {
@@ -283,7 +346,7 @@
     event.preventDefault();
     if (!form?.reportValidity()) return;
     const slug = field<HTMLInputElement>("slug")?.value.trim() ?? "";
-    const path = activePath || `src/content/blog/${slug}.md`;
+    const path = activePath || `src/content/blog/${slug}${newFileExtension}`;
     const data = readForm();
     setStatus("正在提交…", "working");
     const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
@@ -359,6 +422,7 @@
     updatePreview();
   });
   deleteButton?.addEventListener("click", deletePost);
+  importInput?.addEventListener("change", importMarkdown);
   window.addEventListener("beforeunload", (event) => {
     if (!dirty) return;
     event.preventDefault();

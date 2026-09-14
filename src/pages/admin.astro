@@ -55,6 +55,10 @@ const apiConfigured = Boolean(siteConfig.adminApi);
           </div>
           <div class="admin-toolbar-actions">
             <span class="admin-save-state" data-save-state aria-live="polite">尚未保存</span>
+            <label class="admin-quiet-button admin-import-button">
+              <input type="file" accept=".md,.mdx,text/markdown" data-import-file />
+              <span aria-hidden="true">↑</span> 导入 Markdown
+            </label>
             <button class="admin-quiet-button danger" type="button" data-delete hidden>删除</button>
             <button class="button admin-save-button" type="submit">保存并发布</button>
           </div>
@@ -62,7 +66,7 @@ const apiConfigured = Boolean(siteConfig.adminApi);
 
         <div class="admin-editor-body">
           <aside class="admin-fields">
-            <label><span>文件名</span><div class="admin-slug-field"><input name="slug" required pattern="[a-z0-9-]+" placeholder="my-new-post" /><small>.md</small></div></label>
+            <label><span>文件名</span><div class="admin-slug-field"><input name="slug" required pattern="[a-z0-9-]+" placeholder="my-new-post" /><small data-file-extension>.md</small></div></label>
             <label><span>标题</span><input name="title" required placeholder="文章标题" /></label>
             <label><span>摘要</span><textarea name="description" rows="3" required placeholder="一句话说明这篇文章的内容"></textarea></label>
             <label><span>分类</span><select name="category" required>
