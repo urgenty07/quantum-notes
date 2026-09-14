@@ -161,20 +161,32 @@ main { min-height: calc(100vh - 14rem); }
 .hero-console { --pointer-x: 50%; --pointer-y: 50%; position: relative; overflow: hidden; border: 1px solid var(--border-strong); border-radius: var(--radius-lg); background: radial-gradient(circle at var(--pointer-x) var(--pointer-y), color-mix(in srgb, var(--blue) 11%, transparent), transparent 45%), color-mix(in srgb, var(--surface) 91%, transparent); box-shadow: var(--shadow-lg); transform: perspective(1100px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)); transform-style: preserve-3d; transition: transform 160ms ease-out, border-color 180ms ease; will-change: transform; }
 .hero-console::before { position: absolute; inset: 0; z-index: 2; border-radius: inherit; box-shadow: inset 0 1px 0 color-mix(in srgb, white 60%, transparent); pointer-events: none; content: ""; }
 .console-header { display: flex; justify-content: space-between; padding: 0.9rem 1.1rem; border-bottom: 1px solid var(--border); color: var(--faint); font: 0.67rem/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.08em; text-transform: uppercase; }
-.console-visual { position: relative; height: 14rem; overflow: hidden; border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--surface-soft) 72%, transparent); }
-.console-visual::before { position: absolute; inset: 0; background-image: radial-gradient(circle, color-mix(in srgb, var(--border-strong) 75%, transparent) 1px, transparent 1px); background-size: 15px 15px; opacity: 0.5; content: ""; }
-.orbit { position: absolute; z-index: 1; top: 50%; left: 50%; width: 11rem; height: 4.1rem; border: 1px solid color-mix(in srgb, var(--blue) 80%, transparent); border-radius: 50%; }
-.orbit-one { transform: translate(-50%, -50%) rotate(27deg); animation: orbit-one 14s linear infinite; }
-.orbit-two { transform: translate(-50%, -50%) rotate(-27deg); animation: orbit-two 18s linear infinite; }
-.orbit-core { position: absolute; z-index: 2; top: 50%; left: 50%; display: grid; width: 3.75rem; height: 3.75rem; transform: translate(calc(-50% + var(--orbit-x, 0px)), calc(-50% + var(--orbit-y, 0px))); place-items: center; border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border)); border-radius: 50%; color: var(--accent-strong); background: var(--surface); box-shadow: 0 0 2.5rem color-mix(in srgb, var(--accent) 18%, transparent); font: 1.6rem/1 Georgia, serif; transition: transform 130ms ease-out; }
-.axis { position: absolute; background: color-mix(in srgb, var(--border-strong) 58%, transparent); }
-.axis-x { top: 50%; left: 12%; width: 76%; height: 1px; }
-.axis-y { top: 12%; left: 50%; width: 1px; height: 76%; }
-.console-list { margin: 0; padding: 0.35rem 1.1rem 0.55rem; }
-.console-list div { display: grid; grid-template-columns: 4.2rem 1fr; padding: 0.7rem 0; border-bottom: 1px solid var(--border); gap: 0.75rem; }
-.console-list div:last-child { border-bottom: 0; }
-.console-list dt { color: var(--accent-strong); font: 0.68rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; font-weight: 700; text-transform: uppercase; }
-.console-list dd { margin: 0; color: var(--muted); font-size: 0.78rem; line-height: 1.4; }
+.console-visual { position: relative; height: clamp(23rem, 31vw, 29rem); overflow: hidden; background: radial-gradient(circle at var(--pointer-x) var(--pointer-y), color-mix(in srgb, var(--accent) 18%, transparent), transparent 24%), radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--blue) 16%, transparent), transparent 34%), color-mix(in srgb, var(--surface-soft) 74%, transparent); isolation: isolate; }
+.console-visual::before { position: absolute; inset: 0; z-index: -2; background-image: linear-gradient(color-mix(in srgb, var(--border-strong) 34%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--border-strong) 34%, transparent) 1px, transparent 1px), radial-gradient(circle, color-mix(in srgb, var(--accent) 45%, transparent) 1px, transparent 1.5px); background-size: 45px 45px, 45px 45px, 15px 15px; mask-image: radial-gradient(circle at center, black 20%, transparent 72%); opacity: 0.7; content: ""; }
+.console-visual::after { position: absolute; z-index: 6; top: -28%; bottom: -28%; left: -32%; width: 18%; transform: rotate(14deg); background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 28%, transparent), rgba(255, 255, 255, 0.18), transparent); filter: blur(5px); pointer-events: none; content: ""; animation: quantum-sweep 5.8s 1.2s ease-in-out infinite; }
+.quantum-haze { position: absolute; z-index: -1; top: 50%; left: 50%; width: min(88%, 25rem); aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: conic-gradient(from 90deg, color-mix(in srgb, var(--accent) 16%, transparent), transparent 20%, color-mix(in srgb, var(--blue) 16%, transparent) 48%, transparent 72%, color-mix(in srgb, var(--accent) 14%, transparent)); filter: blur(24px); animation: quantum-haze-spin 18s linear infinite; }
+.orbit { position: absolute; z-index: 2; top: 50%; left: 50%; width: min(76%, 20rem); height: min(27%, 7.2rem); border: 1px solid color-mix(in srgb, var(--blue) 74%, transparent); border-radius: 50%; box-shadow: inset 0 0 1rem color-mix(in srgb, var(--blue) 7%, transparent), 0 0 1.5rem color-mix(in srgb, var(--blue) 7%, transparent); }
+.orbit::before, .orbit::after, .orbit i { position: absolute; border-radius: 50%; content: ""; }
+.orbit::before { top: 50%; left: -0.23rem; width: 0.46rem; height: 0.46rem; margin-top: -0.23rem; background: var(--accent-strong); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent), 0 0 18px var(--accent); }
+.orbit::after { top: 50%; right: -0.16rem; width: 0.32rem; height: 0.32rem; margin-top: -0.16rem; background: var(--blue); box-shadow: 0 0 14px var(--blue); }
+.orbit i { top: -0.13rem; left: 58%; width: 0.26rem; height: 0.26rem; background: color-mix(in srgb, var(--text) 78%, var(--accent)); box-shadow: 0 0 10px color-mix(in srgb, var(--text) 48%, transparent); }
+.orbit-one { animation: orbit-one 15s linear infinite; }
+.orbit-two { width: min(70%, 18rem); height: min(32%, 8.5rem); border-color: color-mix(in srgb, var(--accent) 68%, transparent); animation: orbit-two 19s linear infinite; }
+.orbit-three { width: min(63%, 16rem); height: min(36%, 9.5rem); border-style: dashed; border-color: color-mix(in srgb, var(--accent) 35%, transparent); animation: orbit-three 24s linear infinite; }
+.orbit-core { position: absolute; z-index: 5; top: 50%; left: 50%; display: grid; width: clamp(5.5rem, 9vw, 7rem); height: clamp(5.5rem, 9vw, 7rem); transform: translate(calc(-50% + var(--orbit-x, 0px)), calc(-50% + var(--orbit-y, 0px))); place-items: center; border: 1px solid color-mix(in srgb, var(--accent) 62%, var(--border)); border-radius: 50%; color: var(--accent-strong); background: radial-gradient(circle, color-mix(in srgb, var(--surface) 96%, transparent) 34%, color-mix(in srgb, var(--accent) 9%, var(--surface)) 100%); box-shadow: inset 0 0 0 0.45rem color-mix(in srgb, var(--accent) 5%, transparent), 0 0 2.8rem color-mix(in srgb, var(--accent) 24%, transparent), 0 0 5rem color-mix(in srgb, var(--blue) 12%, transparent); transition: transform 130ms ease-out; }
+.orbit-core::before { position: absolute; inset: -0.65rem; border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent); border-top-color: var(--accent); border-right-color: color-mix(in srgb, var(--blue) 72%, transparent); border-radius: 50%; content: ""; animation: quantum-core-spin 7s linear infinite; }
+.orbit-core::after { position: absolute; inset: -1.4rem; transform: scale(0.78); border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent); border-radius: 50%; opacity: 0; content: ""; animation: quantum-core-pulse 3.2s ease-out infinite; }
+.orbit-core span { position: absolute; inset: 0.7rem; border: 1px dashed color-mix(in srgb, var(--blue) 30%, transparent); border-radius: 50%; animation: quantum-core-spin 12s linear infinite reverse; }
+.orbit-core strong { position: relative; z-index: 1; font: clamp(2.25rem, 5vw, 3.3rem)/1 Georgia, "Times New Roman", serif; font-weight: 400; text-shadow: 0 0 22px color-mix(in srgb, var(--accent) 36%, transparent); }
+.axis { position: absolute; z-index: 1; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--border-strong) 64%, transparent), transparent); }
+.axis-x { top: 50%; left: 5%; width: 90%; height: 1px; }
+.axis-y { top: 5%; left: 50%; width: 1px; height: 90%; background: linear-gradient(transparent, color-mix(in srgb, var(--border-strong) 64%, transparent), transparent); }
+.quantum-scan { position: absolute; z-index: 1; top: 50%; left: 50%; width: 5rem; height: 5rem; transform: translate(-50%, -50%) scale(0.5); border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent); border-radius: 50%; opacity: 0; animation: quantum-scan 4s ease-out infinite; }
+.quantum-scan-two { animation-delay: 2s; }
+.quantum-spark { position: absolute; z-index: 4; width: 0.34rem; height: 0.34rem; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+.spark-one { top: 22%; left: 24%; animation: quantum-spark 3.6s ease-in-out infinite; }
+.spark-two { top: 71%; right: 19%; width: 0.24rem; height: 0.24rem; background: var(--blue); box-shadow: 0 0 12px var(--blue); animation: quantum-spark 4.2s 0.8s ease-in-out infinite; }
+.spark-three { top: 33%; right: 15%; width: 0.2rem; height: 0.2rem; animation: quantum-spark 3.9s 1.5s ease-in-out infinite; }
 .hero-caption { position: absolute; right: 0; bottom: 1.5rem; left: 0; display: flex; align-items: center; gap: 0.75rem; color: var(--faint); font: 0.66rem/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.09em; text-transform: uppercase; }
 .hero-caption span:first-child { color: var(--accent-strong); }
 
@@ -510,7 +522,7 @@ body:has(.admin-page) .site-footer { display: none; }
   .hero h1 { font-size: clamp(3rem, 15vw, 4.25rem); }
   .hero-caption { bottom: 1.2rem; }
   .hero-console { width: min(100%, 24rem); }
-  .console-visual { height: 12rem; }
+  .console-visual { height: 21rem; }
   .section-heading { align-items: start; flex-direction: column; gap: 1rem; }
   .section-heading > p { text-align: left; }
   .timeline-year { grid-template-columns: 1fr; gap: 1rem; }
@@ -547,7 +559,7 @@ body:has(.admin-page) .site-footer { display: none; }
   .certificate-frame { outline-offset: -0.48rem; }
   .certificate-head { align-items: start; flex-direction: column; gap: 0.25rem; }
   .certificate-body > h2 { letter-spacing: 0.08em; text-indent: 0.08em; }
-  .console-list div { grid-template-columns: 3.8rem 1fr; }
+  .console-visual { height: 19rem; }
   .post-card-footer { align-items: start; flex-direction: column; gap: 0.4rem; }
   .reading-time { align-self: flex-end; }
   .project-heading { flex-direction: column-reverse; }
@@ -577,6 +589,13 @@ body:has(.admin-page) .site-footer { display: none; }
   @keyframes rise-in { from { translate: 0 14px; opacity: 0; } to { translate: 0 0; opacity: 1; } }
   @keyframes orbit-one { from { transform: translate(calc(-50% + var(--orbit-x, 0px)), calc(-50% + var(--orbit-y, 0px))) rotate(27deg); } to { transform: translate(calc(-50% + var(--orbit-x, 0px)), calc(-50% + var(--orbit-y, 0px))) rotate(387deg); } }
   @keyframes orbit-two { from { transform: translate(calc(-50% + var(--orbit-x, 0px)), calc(-50% + var(--orbit-y, 0px))) rotate(333deg); } to { transform: translate(calc(-50% + var(--orbit-x, 0px)), calc(-50% + var(--orbit-y, 0px))) rotate(-27deg); } }
+  @keyframes orbit-three { from { transform: translate(-50%, -50%) rotate(92deg); } to { transform: translate(-50%, -50%) rotate(452deg); } }
+  @keyframes quantum-haze-spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+  @keyframes quantum-core-spin { to { transform: rotate(360deg); } }
+  @keyframes quantum-core-pulse { 0% { transform: scale(0.78); opacity: 0; } 24% { opacity: 0.7; } 82%, 100% { transform: scale(1.55); opacity: 0; } }
+  @keyframes quantum-scan { 0% { transform: translate(-50%, -50%) scale(0.55); opacity: 0; } 22% { opacity: 0.55; } 82%, 100% { transform: translate(-50%, -50%) scale(4.6); opacity: 0; } }
+  @keyframes quantum-spark { 0%, 100% { transform: translate3d(0, 0, 0) scale(0.7); opacity: 0.38; } 50% { transform: translate3d(0.7rem, -0.55rem, 0) scale(1.25); opacity: 1; } }
+  @keyframes quantum-sweep { 0%, 62% { left: -32%; opacity: 0; } 68% { opacity: 1; } 86%, 100% { left: 118%; opacity: 0; } }
 }
 
 @media (prefers-reduced-motion: reduce) {
