@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostCard from "../components/PostCard.astro";
+import { competitionAchievements } from "../data/competitions";
 import { publishedPosts } from "../utils/content";
 
 const competitionPosts = publishedPosts(await getCollection("blog")).filter((post) => post.data.category === "Competitions");
@@ -14,15 +15,38 @@ const competitionPosts = publishedPosts(await getCollection("blog")).filter((pos
       <h1>我的竞赛</h1>
       <p>关注问题拆解、策略选择、团队协作和实战中形成的判断。</p>
     </header>
-    {competitionPosts.length > 0 ? (
-      <section class="post-list page-section" aria-label="竞赛记录">
+    <section class="competition-showcase page-section section-compact" aria-labelledby="competition-achievements-title">
+      <div class="section-heading">
+        <div><p class="section-kicker">Achievements</p><h2 id="competition-achievements-title">竞赛成果</h2></div>
+        <p>只保留赛事与成果信息，个人身份信息不公开。</p>
+      </div>
+      <div class="competition-grid">
+        {competitionAchievements.map((achievement) => (
+          <article class="achievement-card">
+            <header>
+              <span>{achievement.index} / {achievement.date}</span>
+              <strong>{achievement.award}</strong>
+            </header>
+            <div class="achievement-main">
+              <p>{achievement.stage} · {achievement.group}</p>
+              <h2>{achievement.event}</h2>
+            </div>
+            <div class="achievement-project">
+              <span>参赛项目</span>
+              <h3>{achievement.project}</h3>
+              <p>{achievement.summary}</p>
+            </div>
+            <footer>Verified achievement · Text-only public record</footer>
+          </article>
+        ))}
+      </div>
+    </section>
+    {competitionPosts.length > 0 && (
+      <section class="page-section" aria-label="竞赛复盘">
+        <div class="section-heading"><div><p class="section-kicker">Competition log</p><h2>参赛复盘</h2></div></div>
+        <div class="post-list">
         {competitionPosts.map((post) => <PostCard post={post} />)}
-      </section>
-    ) : (
-      <section class="empty-state page-section section-compact">
-        <span>02 / Awaiting records</span>
-        <h2>竞赛记录待补充</h2>
-        <p>这里会按赛事整理目标、角色、过程、结果与复盘；在管理后台把文章分类设为 Competitions 即可出现。</p>
+        </div>
       </section>
     )}
   </div>
