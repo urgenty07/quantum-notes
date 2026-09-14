@@ -24,19 +24,28 @@ const competitionPosts = publishedPosts(await getCollection("blog")).filter((pos
         {competitionAchievements.map((achievement) => (
           <article class="achievement-card">
             <header>
-              <span>{achievement.index} / {achievement.date}</span>
-              <strong>{achievement.award}</strong>
+              <span>Competition archive / {achievement.index}</span>
+              <time datetime="2026-08">{achievement.date}</time>
             </header>
-            <div class="achievement-main">
-              <p>{achievement.stage} · {achievement.group}</p>
-              <h2>{achievement.event}</h2>
+            <div class="achievement-layout">
+              <div class="achievement-main">
+                <p>{achievement.stage} · {achievement.group}</p>
+                <h2>{achievement.event}</h2>
+                <div class="achievement-result">
+                  <span>Final result</span>
+                  <strong>{achievement.award}</strong>
+                </div>
+              </div>
+              <div class="achievement-project">
+                <span>参赛项目 / Project</span>
+                <h3>{achievement.project}</h3>
+                <p>{achievement.summary}</p>
+                <ul aria-label="项目关键词">
+                  {achievement.topics.map((topic) => <li>{topic}</li>)}
+                </ul>
+              </div>
             </div>
-            <div class="achievement-project">
-              <span>参赛项目</span>
-              <h3>{achievement.project}</h3>
-              <p>{achievement.summary}</p>
-            </div>
-            <footer>Verified achievement · Text-only public record</footer>
+            <footer><span>Verified achievement</span><span>Privacy-redacted · Text-only record</span></footer>
           </article>
         ))}
       </div>
