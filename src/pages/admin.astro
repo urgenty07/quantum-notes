@@ -3,6 +3,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import AdminEditor from "../components/AdminEditor.astro";
 import { siteConfig } from "../config";
 import { withBase } from "../utils/content";
+
+const apiConfigured = Boolean(siteConfig.adminApi);
 ---
 
 <BaseLayout title="Editor" description="Zephyr 博客内容管理后台。" noindex>
@@ -24,10 +26,10 @@ import { withBase } from "../utils/content";
         <p class="section-kicker">Owner access only</p>
         <h2>登录后管理你的内容</h2>
         <p>通过 GitHub App 验证身份。只有仓库所有者 urgenty07 可以读取、创建、修改或删除文章。</p>
-        <button class="button admin-login-button" type="button" data-login disabled={siteConfig.adminApi === ""}>
+        <button class="button admin-login-button" type="button" data-login disabled={!apiConfigured}>
           使用 GitHub 登录 <span aria-hidden="true">↗</span>
         </button>
-        {siteConfig.adminApi === "" && <p class="admin-config-note">安全后端正在配置，完成后这里会自动启用。</p>}
+        {!apiConfigured && <p class="admin-config-note">安全后端正在配置，完成后这里会自动启用。</p>}
         <p class="admin-error" data-login-error hidden></p>
       </div>
     </section>
