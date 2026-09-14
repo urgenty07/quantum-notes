@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import AdminEditor from "../components/AdminEditor.astro";
+import CompetitionEditor from "../components/CompetitionEditor.astro";
 import { siteConfig } from "../config";
 import { withBase } from "../utils/content";
 
@@ -15,6 +16,10 @@ const apiConfigured = Boolean(siteConfig.adminApi);
         <h1>Content Editor</h1>
       </div>
       <div class="admin-account" data-account hidden>
+        <nav class="admin-content-tabs" aria-label="管理内容类型">
+          <button type="button" data-admin-view="posts" data-active="true">文章</button>
+          <button type="button" data-admin-view="competitions" data-active="false">竞赛成果</button>
+        </nav>
         <span data-account-name>urgenty07</span>
         <button class="admin-quiet-button" type="button" data-logout>退出</button>
       </div>
@@ -25,7 +30,7 @@ const apiConfigured = Boolean(siteConfig.adminApi);
       <div>
         <p class="section-kicker">Owner access only</p>
         <h2>登录后管理你的内容</h2>
-        <p>通过 GitHub App 验证身份。只有仓库所有者 urgenty07 可以读取、创建、修改或删除文章。</p>
+        <p>通过 GitHub App 验证身份。只有仓库所有者 urgenty07 可以管理文章与公开竞赛成果。</p>
         <button class="button admin-login-button" type="button" data-login disabled={!apiConfigured}>
           使用 GitHub 登录 <span aria-hidden="true">↗</span>
         </button>
@@ -34,7 +39,7 @@ const apiConfigured = Boolean(siteConfig.adminApi);
       </div>
     </section>
 
-    <section class="admin-workspace" data-workspace hidden>
+    <section class="admin-workspace" data-workspace data-post-workspace hidden>
       <aside class="admin-sidebar">
         <div class="admin-sidebar-head">
           <div><span class="admin-label">Content</span><strong>全部文章</strong></div>
@@ -94,6 +99,62 @@ const apiConfigured = Boolean(siteConfig.adminApi);
         </div>
       </form>
     </section>
+
+    <section class="admin-workspace admin-competition-workspace" data-competition-workspace hidden>
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar-head">
+          <div><span class="admin-label">Achievements</span><strong>竞赛成果</strong></div>
+          <button class="admin-icon-button" type="button" data-new-achievement aria-label="新建竞赛成果">＋</button>
+        </div>
+        <div class="admin-privacy-note">
+          <strong>公开信息模式</strong>
+          <p>请勿填写姓名、学校、学号、证书编号或联系方式。</p>
+        </div>
+        <div class="admin-post-list" data-achievement-list aria-live="polite"></div>
+      </aside>
+
+      <form class="admin-editor admin-competition-editor" data-competition-form>
+        <div class="admin-editor-toolbar">
+          <div>
+            <span class="admin-label">Competition record</span>
+            <strong data-comp-current>新建竞赛成果</strong>
+          </div>
+          <div class="admin-toolbar-actions">
+            <span class="admin-save-state" data-comp-save-state aria-live="polite">尚未保存</span>
+            <button class="admin-quiet-button danger" type="button" data-delete-achievement hidden>删除</button>
+            <button class="button admin-save-button" type="submit">保存并发布</button>
+          </div>
+        </div>
+
+        <div class="admin-achievement-editor-body">
+          <aside class="admin-fields admin-achievement-fields">
+            <label><span>时间</span><input name="date" required pattern="[0-9]{4}\.(0[1-9]|1[0-2])" placeholder="2026.08" /><small>格式：YYYY.MM</small></label>
+            <label><span>赛事名称</span><textarea name="event" rows="3" required maxlength="120" placeholder="赛事完整名称"></textarea></label>
+            <label><span>赛事阶段</span><input name="stage" required maxlength="50" placeholder="全国总决赛" /></label>
+            <label><span>参赛组别</span><input name="group" required maxlength="50" placeholder="普通高等教育组" /></label>
+            <label><span>获奖等级</span><input name="award" required maxlength="50" placeholder="三等奖" /></label>
+            <label><span>项目名称</span><textarea name="project" rows="3" required maxlength="160" placeholder="参赛项目名称"></textarea></label>
+            <label><span>项目简介</span><textarea name="summary" rows="4" required maxlength="300" placeholder="只写可以公开的项目内容"></textarea></label>
+            <label><span>技术标签</span><input name="topics" required placeholder="大模型, 多智能体" /><small>使用英文逗号分隔，最多 10 个</small></label>
+          </aside>
+
+          <section class="admin-achievement-preview" aria-label="竞赛成果预览">
+            <div class="admin-pane-head"><span>Safe preview</span><span>仅公开字段</span></div>
+            <div class="admin-achievement-card">
+              <div class="admin-achievement-meta"><span data-comp-preview-date>YYYY.MM</span><span data-comp-preview-award>获奖等级</span></div>
+              <p data-comp-preview-stage>赛事阶段 · 参赛组别</p>
+              <h2 data-comp-preview-event>赛事名称</h2>
+              <div class="admin-achievement-rule" aria-hidden="true"><span></span></div>
+              <span class="admin-label">Project dossier</span>
+              <h3 data-comp-preview-project>参赛项目名称</h3>
+              <p data-comp-preview-summary>项目简介会在这里实时显示。</p>
+              <ul data-comp-preview-topics aria-label="技术标签"></ul>
+            </div>
+          </section>
+        </div>
+      </form>
+    </section>
   </div>
   <AdminEditor />
+  <CompetitionEditor />
 </BaseLayout>

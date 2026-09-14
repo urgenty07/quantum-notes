@@ -2,6 +2,8 @@ const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 const POST_PATH = /^src\/content\/blog\/[a-z0-9](?:[a-z0-9\/-]*[a-z0-9])?\.mdx?$/;
 const MAX_POST_BYTES = 750_000;
+const COMPETITIONS_PATH = "src/data/competitions.json";
+const MAX_COMPETITION_RECORDS = 50;
 const GITHUB_API_VERSION = "2026-03-10";
 
 export default {
@@ -61,6 +63,12 @@ async function route(request, env) {
     }
     if (request.method === "DELETE" && url.pathname === "/api/post") {
       return deletePost(request, env, session.token);
+    }
+    if (request.method === "GET" && url.pathname === "/api/competitions") {
+      return getCompetitions(request, env, session.token);
+    }
+    if (request.method === "PUT" && url.pathname === "/api/competitions") {
+      return saveCompetitions(request, env, session.token);
     }
   }
 
@@ -182,6 +190,76 @@ async function deletePost(request, env, token) {
     })
   });
   return json({ ok: true }, 200, request, env);
+}
+
+async function getCompetitions(request, env, token) {
+  const result = await github(token, `/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/contents/${COMPETITIONS_PATH}?ref=${encodeURIComponent(env.GITHUB_BRANCH)}`);
+  if (result.type !== "file" || !result.content) return json({ error: "竞赛数据不可用。" }, 502, request, env);
+  try {
+    const bytes = Uint8Array.from(atob(result.content.replace(/\n/g, "")), (char) => char.charCodeAt(0));
+    const achievements = normalizeAchievements(JSON.parse(decoder.decode(bytes)));
+    return json({ achievements, sha: result.sha }, 200, request, env);
+  } catch (error) {
+    console.error("Competition data parsing failed", error);
+    return json({ error: "竞赛数据格式异常。" }, 502, request, env);
+  }
+}
+
+async function saveCompetitions(request, env, token) {
+  const body = await readJson(request);
+  if (!body || !Array.isArray(body.achievements) || !/^[a-f0-9]{40}$/.test(body.sha || "")) {
+    return json({ error: "竞赛数据或版本标识无效。" }, 400, request, env);
+  }
+  let achievements;
+  try {
+    achievements = normalizeAchievements(body.achievements);
+  } catch (error) {
+    return json({ error: error instanceof Error ? error.message : "竞赛数据无效。" }, 400, request, env);
+  }
+  const content = `${JSON.stringify(achievements, null, 2)}\n`;
+  const result = await github(token, `/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/contents/${COMPETITIONS_PATH}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      message: "Update competition achievements from web editor",
+      content: bytesToBase64(encoder.encode(content)),
+      branch: env.GITHUB_BRANCH,
+      sha: body.sha
+    })
+  });
+  return json({ achievements, sha: result.content.sha }, 200, request, env);
+}
+
+function normalizeAchievements(value) {
+  if (!Array.isArray(value) || value.length > MAX_COMPETITION_RECORDS) {
+    throw new Error("竞赛记录数量无效。");
+  }
+  const normalized = value.map((item) => {
+    if (!item || typeof item !== "object") throw new Error("竞赛记录格式无效。");
+    const date = cleanText(item.date, 7, "时间");
+    if (!/^\d{4}\.(0[1-9]|1[0-2])$/.test(date)) throw new Error("时间格式应为 YYYY.MM。");
+    const topics = Array.isArray(item.topics) ? item.topics.map((topic) => cleanText(topic, 30, "技术标签")) : [];
+    if (topics.length > 10) throw new Error("每项竞赛最多填写 10 个技术标签。");
+    return {
+      index: "",
+      date,
+      event: cleanText(item.event, 120, "赛事名称"),
+      stage: cleanText(item.stage, 50, "赛事阶段"),
+      group: cleanText(item.group, 50, "参赛组别"),
+      award: cleanText(item.award, 50, "获奖等级"),
+      project: cleanText(item.project, 160, "项目名称"),
+      summary: cleanText(item.summary, 300, "项目简介"),
+      topics: [...new Set(topics)]
+    };
+  });
+  normalized.sort((a, b) => b.date.localeCompare(a.date));
+  return normalized.map((item, index) => ({ ...item, index: String(index + 1).padStart(2, "0") }));
+}
+
+function cleanText(value, maxLength, label) {
+  if (typeof value !== "string") throw new Error(`${label}格式无效。`);
+  const cleaned = value.trim().replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ");
+  if (!cleaned || cleaned.length > maxLength) throw new Error(`${label}不能为空且不能超过 ${maxLength} 个字符。`);
+  return cleaned;
 }
 
 async function github(token, path, init = {}) {

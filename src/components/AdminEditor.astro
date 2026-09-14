@@ -14,6 +14,8 @@
   const app = document.querySelector<HTMLElement>("[data-admin-app]");
   const loginPanel = document.querySelector<HTMLElement>("[data-login-panel]");
   const workspace = document.querySelector<HTMLElement>("[data-workspace]");
+  const competitionWorkspace = document.querySelector<HTMLElement>("[data-competition-workspace]");
+  const viewButtons = document.querySelectorAll<HTMLButtonElement>("[data-admin-view]");
   const account = document.querySelector<HTMLElement>("[data-account]");
   const form = document.querySelector<HTMLFormElement>("[data-editor-form]");
   const postList = document.querySelector<HTMLElement>("[data-post-list]");
@@ -73,6 +75,7 @@
   function showLogin(message = "") {
     if (loginPanel) loginPanel.hidden = false;
     if (workspace) workspace.hidden = true;
+    if (competitionWorkspace) competitionWorkspace.hidden = true;
     if (account) account.hidden = true;
     const error = document.querySelector<HTMLElement>("[data-login-error]");
     if (error) {
@@ -84,9 +87,21 @@
   function showWorkspace(login: string) {
     if (loginPanel) loginPanel.hidden = true;
     if (workspace) workspace.hidden = false;
+    if (competitionWorkspace) competitionWorkspace.hidden = true;
     if (account) account.hidden = false;
     const name = document.querySelector<HTMLElement>("[data-account-name]");
     if (name) name.textContent = login;
+    setAdminView("posts");
+  }
+
+  function setAdminView(view: "posts" | "competitions") {
+    if (workspace) workspace.hidden = view !== "posts";
+    if (competitionWorkspace) competitionWorkspace.hidden = view !== "competitions";
+    viewButtons.forEach((button) => {
+      button.dataset.active = String(button.dataset.adminView === view);
+      button.setAttribute("aria-current", button.dataset.adminView === view ? "page" : "false");
+    });
+    if (view === "competitions") window.dispatchEvent(new CustomEvent("zephyr:competitions-open"));
   }
 
   function yamlValue(value: string) {
@@ -408,6 +423,9 @@
   document.querySelector<HTMLButtonElement>("[data-logout]")?.addEventListener("click", () => {
     clearSession();
     location.reload();
+  });
+  viewButtons.forEach((button) => {
+    button.addEventListener("click", () => setAdminView(button.dataset.adminView === "competitions" ? "competitions" : "posts"));
   });
   document.querySelector<HTMLButtonElement>("[data-new-post]")?.addEventListener("click", () => {
     if (!dirty || window.confirm("当前修改尚未保存，确定新建文章吗？")) newPost();

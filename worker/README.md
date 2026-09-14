@@ -1,8 +1,13 @@
 # Zephyr Blog Admin Worker
 
 This Worker is the private write gateway used by `/admin`. It authenticates the
-single allowed GitHub account and writes only Markdown files under
-`src/content/blog/` in the configured repository.
+single allowed GitHub account and can write only Markdown files under
+`src/content/blog/` or the exact structured competition file
+`src/data/competitions.json` in the configured repository.
+
+The competition API accepts only the public-facing fields used by the site,
+validates their lengths and date format, and does not expose fields for names,
+schools, certificate identifiers, contact details, PDFs, or images.
 
 ## Required secrets
 

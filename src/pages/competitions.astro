@@ -6,6 +6,15 @@ import { competitionAchievements } from "../data/competitions";
 import { publishedPosts } from "../utils/content";
 
 const competitionPosts = publishedPosts(await getCollection("blog")).filter((post) => post.data.category === "Competitions");
+const timeline = competitionAchievements
+  .slice()
+  .sort((a, b) => b.date.localeCompare(a.date))
+  .reduce<Record<string, typeof competitionAchievements>>((groups, achievement) => {
+    const year = achievement.date.slice(0, 4) || "Other";
+    (groups[year] ??= []).push(achievement);
+    return groups;
+  }, {});
+const timelineYears = Object.entries(timeline).sort(([a], [b]) => b.localeCompare(a));
 ---
 
 <BaseLayout title="Competitions" description="我的竞赛经历、解题过程与赛后复盘。">
@@ -20,56 +29,63 @@ const competitionPosts = publishedPosts(await getCollection("blog")).filter((pos
         <div><p class="section-kicker">Achievements</p><h2 id="competition-achievements-title">竞赛成果</h2></div>
         <p>只保留赛事与成果信息，个人身份信息不公开。</p>
       </div>
-      <div class="competition-grid">
-        {competitionAchievements.map((achievement) => (
-          <div class="competition-entry">
-            <article class="achievement-certificate">
-              <div class="certificate-frame">
-                <header class="certificate-head">
-                  <span>Honor archive / {achievement.index}</span>
-                  <time datetime="2026-08">{achievement.date}</time>
-                </header>
-                <div class="certificate-body">
-                  <p class="certificate-kicker">Certificate of Achievement</p>
-                  <h2>荣誉证书</h2>
-                  <div class="certificate-rule" aria-hidden="true"><span></span></div>
-                  <p class="certificate-intro">兹记录该参赛团队于</p>
-                  <h3>{achievement.event}</h3>
-                  <p class="certificate-group">{achievement.stage} · {achievement.group}</p>
-                  <div class="certificate-result">
-                    <span>荣获</span>
-                    <strong>{achievement.award}</strong>
-                  </div>
+      <div class="competition-timeline">
+        {timelineYears.map(([year, achievements]) => (
+          <section class="timeline-year" aria-labelledby={`competition-year-${year}`}>
+            <div class="timeline-marker"><span id={`competition-year-${year}`}>{year}</span></div>
+            <div class="competition-grid">
+              {achievements.map((achievement) => (
+                <div class="competition-entry">
+                  <article class="achievement-certificate">
+                    <div class="certificate-frame">
+                      <header class="certificate-head">
+                        <span>Honor archive / {achievement.index}</span>
+                        <time datetime={achievement.date.replace(".", "-")}>{achievement.date}</time>
+                      </header>
+                      <div class="certificate-body">
+                        <p class="certificate-kicker">Certificate of Achievement</p>
+                        <h2>荣誉证书</h2>
+                        <div class="certificate-rule" aria-hidden="true"><span></span></div>
+                        <p class="certificate-intro">兹记录该参赛团队于</p>
+                        <h3>{achievement.event}</h3>
+                        <p class="certificate-group">{achievement.stage} · {achievement.group}</p>
+                        <div class="certificate-result">
+                          <span>荣获</span>
+                          <strong>{achievement.award}</strong>
+                        </div>
+                      </div>
+                      <footer class="certificate-footer">
+                        <span>Verified achievement</span>
+                        <span>Privacy-redacted · Text-only record</span>
+                      </footer>
+                    </div>
+                  </article>
+                  <article class="competition-dossier" aria-label="参赛项目信息">
+                    <header>
+                      <div>
+                        <span>Project dossier / {achievement.index}</span>
+                        <h3>项目档案</h3>
+                      </div>
+                      <time datetime={achievement.date.replace(".", "-")}>{achievement.date}</time>
+                    </header>
+                    <div class="dossier-layout">
+                      <div class="dossier-main">
+                        <span>参赛项目</span>
+                        <h4>{achievement.project}</h4>
+                        <p>{achievement.summary}</p>
+                      </div>
+                      <div class="dossier-focus">
+                        <span>Technology focus</span>
+                        <ul aria-label="项目关键词">
+                          {achievement.topics.map((topic) => <li>{topic}</li>)}
+                        </ul>
+                      </div>
+                    </div>
+                  </article>
                 </div>
-                <footer class="certificate-footer">
-                  <span>Verified achievement</span>
-                  <span>Privacy-redacted · Text-only record</span>
-                </footer>
-              </div>
-            </article>
-            <article class="competition-dossier" aria-label="参赛项目信息">
-              <header>
-                <div>
-                  <span>Project dossier / {achievement.index}</span>
-                  <h3>项目档案</h3>
-                </div>
-                <time datetime="2026-08">{achievement.date}</time>
-              </header>
-              <div class="dossier-layout">
-                <div class="dossier-main">
-                  <span>参赛项目</span>
-                  <h4>{achievement.project}</h4>
-                  <p>{achievement.summary}</p>
-                </div>
-                <div class="dossier-focus">
-                  <span>Technology focus</span>
-                  <ul aria-label="项目关键词">
-                    {achievement.topics.map((topic) => <li>{topic}</li>)}
-                  </ul>
-                </div>
-              </div>
-            </article>
-          </div>
+              ))}
+            </div>
+          </section>
         ))}
       </div>
     </section>

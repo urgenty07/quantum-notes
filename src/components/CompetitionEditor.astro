@@ -1,0 +1,247 @@
+<script>
+  type Achievement = {
+    index: string;
+    date: string;
+    event: string;
+    stage: string;
+    group: string;
+    award: string;
+    project: string;
+    summary: string;
+    topics: string[];
+  };
+
+  const app = document.querySelector<HTMLElement>("[data-admin-app]");
+  const form = document.querySelector<HTMLFormElement>("[data-competition-form]");
+  const list = document.querySelector<HTMLElement>("[data-achievement-list]");
+  const current = document.querySelector<HTMLElement>("[data-comp-current]");
+  const saveState = document.querySelector<HTMLElement>("[data-comp-save-state]");
+  const deleteButton = document.querySelector<HTMLButtonElement>("[data-delete-achievement]");
+  const sessionKey = "zephyr_blog_admin_session";
+  const apiBase = app?.dataset.apiBase?.replace(/\/$/, "") ?? "";
+
+  let achievements: Achievement[] = [];
+  let fileSha = "";
+  let activeIndex = -1;
+  let loaded = false;
+  let loading = false;
+  let dirty = false;
+
+  const field = <T extends HTMLInputElement | HTMLTextAreaElement>(name: string) =>
+    form?.elements.namedItem(name) as T | null;
+
+  function setStatus(message: string, tone: "idle" | "working" | "success" | "error" = "idle") {
+    if (!saveState) return;
+    saveState.textContent = message;
+    saveState.dataset.tone = tone;
+  }
+
+  async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
+    const response = await fetch(`${apiBase}${path}`, {
+      ...options,
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem(sessionKey) ?? ""}`,
+        "Content-Type": "application/json",
+        ...(options.headers ?? {})
+      }
+    });
+    const payload = await response.json().catch(() => ({ error: "服务器返回了无法解析的响应。" }));
+    if (response.status === 401) {
+      sessionStorage.removeItem(sessionKey);
+      location.reload();
+      throw new Error("登录已过期");
+    }
+    if (!response.ok) throw new Error(payload.error ?? "请求失败，请稍后重试。");
+    return payload as T;
+  }
+
+  function currentMonth() {
+    const now = new Date();
+    return `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, "0")}`;
+  }
+
+  function blankAchievement(): Achievement {
+    return {
+      index: "",
+      date: currentMonth(),
+      event: "",
+      stage: "",
+      group: "",
+      award: "",
+      project: "",
+      summary: "",
+      topics: []
+    };
+  }
+
+  function readForm(): Achievement {
+    return {
+      index: activeIndex >= 0 ? achievements[activeIndex]?.index ?? "" : "",
+      date: field<HTMLInputElement>("date")?.value.trim() ?? "",
+      event: field<HTMLTextAreaElement>("event")?.value.trim() ?? "",
+      stage: field<HTMLInputElement>("stage")?.value.trim() ?? "",
+      group: field<HTMLInputElement>("group")?.value.trim() ?? "",
+      award: field<HTMLInputElement>("award")?.value.trim() ?? "",
+      project: field<HTMLTextAreaElement>("project")?.value.trim() ?? "",
+      summary: field<HTMLTextAreaElement>("summary")?.value.trim() ?? "",
+      topics: (field<HTMLInputElement>("topics")?.value ?? "")
+        .split(",")
+        .map((topic) => topic.trim())
+        .filter(Boolean)
+        .slice(0, 10)
+    };
+  }
+
+  function previewText(selector: string, value: string, fallback: string) {
+    const element = document.querySelector<HTMLElement>(selector);
+    if (element) element.textContent = value || fallback;
+  }
+
+  function updatePreview() {
+    const data = readForm();
+    previewText("[data-comp-preview-date]", data.date, "YYYY.MM");
+    previewText("[data-comp-preview-award]", data.award, "获奖等级");
+    previewText("[data-comp-preview-stage]", [data.stage, data.group].filter(Boolean).join(" · "), "赛事阶段 · 参赛组别");
+    previewText("[data-comp-preview-event]", data.event, "赛事名称");
+    previewText("[data-comp-preview-project]", data.project, "参赛项目名称");
+    previewText("[data-comp-preview-summary]", data.summary, "项目简介会在这里实时显示。");
+    const topics = document.querySelector<HTMLElement>("[data-comp-preview-topics]");
+    if (topics) {
+      topics.replaceChildren();
+      data.topics.forEach((topic) => {
+        const item = document.createElement("li");
+        item.textContent = topic;
+        topics.append(item);
+      });
+    }
+  }
+
+  function renderList() {
+    if (!list) return;
+    list.replaceChildren();
+    if (!achievements.length) {
+      const empty = document.createElement("p");
+      empty.className = "admin-list-empty";
+      empty.textContent = "还没有竞赛成果。";
+      list.append(empty);
+      return;
+    }
+    achievements.forEach((achievement, index) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "admin-post-item";
+      button.dataset.active = String(index === activeIndex);
+      const title = document.createElement("strong");
+      title.textContent = achievement.event;
+      const meta = document.createElement("span");
+      meta.textContent = `${achievement.date} · ${achievement.award}`;
+      button.append(title, meta);
+      button.addEventListener("click", () => {
+        if (dirty && !window.confirm("当前修改尚未保存，确定切换竞赛成果吗？")) return;
+        fillForm(achievement, index);
+      });
+      list.append(button);
+    });
+  }
+
+  function fillForm(data: Achievement, index: number) {
+    activeIndex = index;
+    const date = field<HTMLInputElement>("date"); if (date) date.value = data.date;
+    const event = field<HTMLTextAreaElement>("event"); if (event) event.value = data.event;
+    const stage = field<HTMLInputElement>("stage"); if (stage) stage.value = data.stage;
+    const group = field<HTMLInputElement>("group"); if (group) group.value = data.group;
+    const award = field<HTMLInputElement>("award"); if (award) award.value = data.award;
+    const project = field<HTMLTextAreaElement>("project"); if (project) project.value = data.project;
+    const summary = field<HTMLTextAreaElement>("summary"); if (summary) summary.value = data.summary;
+    const topics = field<HTMLInputElement>("topics"); if (topics) topics.value = data.topics.join(", ");
+    if (current) current.textContent = index >= 0 ? data.event : "新建竞赛成果";
+    if (deleteButton) deleteButton.hidden = index < 0;
+    dirty = false;
+    setStatus(index >= 0 ? "已同步" : "尚未保存");
+    updatePreview();
+    renderList();
+  }
+
+  async function loadAchievements() {
+    if (loaded || loading || !list) return;
+    loading = true;
+    list.innerHTML = '<p class="admin-list-empty">正在同步竞赛成果…</p>';
+    try {
+      const result = await api<{ achievements: Achievement[]; sha: string }>("/api/competitions");
+      achievements = result.achievements;
+      fileSha = result.sha;
+      loaded = true;
+      fillForm(achievements[0] ?? blankAchievement(), achievements.length ? 0 : -1);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "读取失败", "error");
+      list.innerHTML = '<p class="admin-list-empty">竞赛数据同步失败。</p>';
+    } finally {
+      loading = false;
+    }
+  }
+
+  async function persist(next: Achievement[], focus: Achievement | null) {
+    if (!fileSha) throw new Error("竞赛数据尚未同步，请刷新后重试。");
+    const result = await api<{ achievements: Achievement[]; sha: string }>("/api/competitions", {
+      method: "PUT",
+      body: JSON.stringify({ sha: fileSha, achievements: next })
+    });
+    achievements = result.achievements;
+    fileSha = result.sha;
+    activeIndex = focus
+      ? achievements.findIndex((item) => item.date === focus.date && item.event === focus.event && item.project === focus.project)
+      : -1;
+    fillForm(activeIndex >= 0 ? achievements[activeIndex] : blankAchievement(), activeIndex);
+  }
+
+  async function saveAchievement(event: SubmitEvent) {
+    event.preventDefault();
+    if (!form?.reportValidity()) return;
+    const draft = readForm();
+    const next = achievements.slice();
+    if (activeIndex >= 0) next[activeIndex] = draft;
+    else next.push(draft);
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    if (submit) submit.disabled = true;
+    setStatus("正在提交…", "working");
+    try {
+      await persist(next, draft);
+      setStatus("已提交，网站正在更新", "success");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "保存失败", "error");
+    } finally {
+      if (submit) submit.disabled = false;
+    }
+  }
+
+  async function deleteAchievement() {
+    if (activeIndex < 0) return;
+    const target = achievements[activeIndex];
+    if (!window.confirm(`确定删除“${target.event}”吗？该操作会提交到 GitHub。`)) return;
+    setStatus("正在删除…", "working");
+    try {
+      await persist(achievements.filter((_, index) => index !== activeIndex), null);
+      setStatus("竞赛成果已删除", "success");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "删除失败", "error");
+    }
+  }
+
+  document.querySelector<HTMLButtonElement>("[data-new-achievement]")?.addEventListener("click", () => {
+    if (dirty && !window.confirm("当前修改尚未保存，确定新建竞赛成果吗？")) return;
+    fillForm(blankAchievement(), -1);
+    field<HTMLTextAreaElement>("event")?.focus();
+  });
+  window.addEventListener("zephyr:competitions-open", loadAchievements);
+  form?.addEventListener("submit", saveAchievement);
+  form?.addEventListener("input", () => {
+    dirty = true;
+    setStatus("有未保存修改");
+    updatePreview();
+  });
+  deleteButton?.addEventListener("click", deleteAchievement);
+  window.addEventListener("beforeunload", (event) => {
+    if (!dirty) return;
+    event.preventDefault();
+  });
+</script>
