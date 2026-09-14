@@ -4,15 +4,15 @@ import ProjectCard from "../components/ProjectCard.astro";
 import { projects } from "../data/projects";
 ---
 
-<BaseLayout title="Projects" description="论文复现、算法实现与个人工具。">
+<BaseLayout title="Projects" description="个人项目、工程实验、算法实现与长期维护的工具。">
   <div class="container">
     <header class="page-title">
-      <p class="section-kicker">Selected work</p>
+      <p class="section-kicker">Index / Selected work</p>
       <h1>Projects</h1>
       <p>个人项目、实验原型、研究工具与持续迭代中的工程实践。</p>
     </header>
     <section class="projects-grid page-section" aria-label="项目列表">
-      {projects.map((project) => <ProjectCard project={project} />)}
+      {projects.map((project, index) => <ProjectCard project={project} index={index + 1} />)}
     </section>
   </div>
 </BaseLayout>

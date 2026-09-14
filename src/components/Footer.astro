@@ -5,11 +5,12 @@ import { withBase } from "../utils/content";
 
 <footer class="site-footer">
   <div class="container footer-inner">
-    <p>© {new Date().getFullYear()} {siteConfig.author}. Built with Astro.</p>
+    <div class="footer-brand"><span class="brand-mark" aria-hidden="true">Ψ</span><div><strong>{siteConfig.author}</strong><p>Build ideas. Leave a trace.</p></div></div>
     <nav aria-label="页脚导航">
       <a href={withBase("/tags")}>Tags</a>
       <a href={withBase("/rss.xml")}>RSS</a>
       {siteConfig.email && <a href={`mailto:${siteConfig.email}`}>Email</a>}
     </nav>
+    <p class="footer-meta">© {new Date().getFullYear()} · Built with Astro</p>
   </div>
 </footer>

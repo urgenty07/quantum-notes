@@ -90,7 +90,7 @@ $$
 
 About 正文在 [`src/pages/about.astro`](src/pages/about.astro)。
 
-项目卡片在 [`src/data/projects.ts`](src/data/projects.ts)。这里的 GitHub URL 当前都是明显的 `YOUR_USERNAME` 占位链接，请替换为真实仓库地址。
+项目卡片在 [`src/data/projects.ts`](src/data/projects.ts)。`github` 字段是可选的；仅在仓库公开后填写，未填写时页面不会渲染无效链接。
 
 ## GitHub Pages 部署
 

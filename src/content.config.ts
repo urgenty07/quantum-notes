@@ -11,6 +11,10 @@ const blog = defineCollection({
     updatedDate: z.coerce.date().optional(),
     tags: z.array(z.string()).default([]),
     category: z.enum([
+      "Projects",
+      "Engineering",
+      "Programming",
+      "Learning Notes",
       "Quantum Computing",
       "Tensor Network",
       "Quantum Machine Learning",

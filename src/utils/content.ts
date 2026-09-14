@@ -3,6 +3,10 @@ import type { CollectionEntry } from "astro:content";
 export type BlogPost = CollectionEntry<"blog">;
 
 export const categoryMap = {
+  projects: "Projects",
+  engineering: "Engineering",
+  programming: "Programming",
+  "learning-notes": "Learning Notes",
   "quantum-computing": "Quantum Computing",
   "tensor-network": "Tensor Network",
   qml: "Quantum Machine Learning",

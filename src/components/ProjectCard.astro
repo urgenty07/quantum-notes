@@ -2,11 +2,12 @@
 import type { Project } from "../data/projects";
 import { withBase } from "../utils/content";
 
-interface Props { project: Project }
-const { project } = Astro.props;
+interface Props { project: Project; index?: number }
+const { project, index } = Astro.props;
 ---
 
 <article class="project-card">
+  <div class="project-index" aria-hidden="true">{String(index ?? 1).padStart(2, "0")}</div>
   <div class="project-heading">
     <h3>{project.name}</h3>
     <span class="status">{project.status}</span>
@@ -16,7 +17,7 @@ const { project } = Astro.props;
     {project.stack.map((item) => <li>{item}</li>)}
   </ul>
   <div class="project-links">
-    <a href={project.github} target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+    {project.github && <a href={project.github} target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>}
     {project.articleSlugs.map((slug) => <a href={withBase(`/blog/${slug}`)}>相关文章</a>)}
   </div>
 </article>

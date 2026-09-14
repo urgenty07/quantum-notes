@@ -15,7 +15,7 @@ const posts = publishedPosts(await getCollection("blog", ({ data }) => !data.dra
 <BaseLayout title={label} description={`${label} 分类下的文章与学习笔记。`}>
   <div class="container">
     <header class="page-title">
-      <a class="eyebrow" href={withBase("/blog")}>← Blog</a>
+      <a class="eyebrow" href={withBase("/blog")}>← Notes</a>
       <h1>{label}</h1>
       <p>{posts.length} 篇文章</p>
     </header>
