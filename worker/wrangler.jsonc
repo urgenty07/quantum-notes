@@ -5,12 +5,16 @@
   "compatibility_date": "2026-09-14",
   "workers_dev": true,
   "preview_urls": true,
+  "secrets": {
+    "required": ["GITHUB_CLIENT_SECRET", "SESSION_SECRET"]
+  },
   "vars": {
     "ALLOWED_ORIGIN": "https://urgenty07.github.io",
     "ADMIN_URL": "https://urgenty07.github.io/quantum-notes/admin",
     "GITHUB_OWNER": "urgenty07",
     "GITHUB_REPO": "quantum-notes",
     "GITHUB_BRANCH": "main",
-    "ALLOWED_USER": "urgenty07"
+    "ALLOWED_USER": "urgenty07",
+    "GITHUB_CLIENT_ID": "Iv23liLtpJekX5icDezR"
   }
 }
